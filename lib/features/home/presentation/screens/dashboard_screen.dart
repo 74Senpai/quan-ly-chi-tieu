@@ -1,0 +1,808 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../core/navigation/app_routes.dart';
+import '../../../ai/presentation/screens/assistant_landing_screen.dart';
+import '../../../calendar/presentation/screens/calendar_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../transactions/presentation/screens/add_expense_screen.dart';
+import '../../../wallets/presentation/screens/wallets_screen.dart';
+import '../widgets/home_components.dart';
+
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
+
+  Future<void> _openAddExpense(BuildContext context) async {
+    final saved = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
+    if (saved == true && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Giao dịch đã được lưu vào ví chính.')),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          const Positioned.fill(child: HomeBackground()),
+          SafeArea(
+            child: Column(
+              children: [
+                const TopBrandBar(userName: 'Trang'),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 132),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _BalanceHero(onAddTap: () => _openAddExpense(context)),
+                        const SizedBox(height: 20),
+                        const _WeeklyOverviewCard(),
+                        const SizedBox(height: 20),
+                        const _AnalyticsGrid(),
+                        const SizedBox(height: 20),
+                        _SectionHeader(
+                          title: 'Giao dịch gần đây',
+                          actionLabel: 'Thêm chi tiêu',
+                          onTap: () => _openAddExpense(context),
+                        ),
+                        const SizedBox(height: 12),
+                        const _RecentTransactionsCard(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 18,
+            bottom: 110,
+            child: FloatingActionButton(
+              onPressed: () => _openAddExpense(context),
+              backgroundColor: const Color(0xFF0053DB),
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: HomeBottomNavigation(
+              activeTab: HomeTab.dashboard,
+              onCalendarTap: () {
+                Navigator.of(
+                  context,
+                ).pushReplacement(buildFadeSlideRoute(const CalendarScreen()));
+              },
+              onWalletsTap: () {
+                Navigator.of(
+                  context,
+                ).pushReplacement(buildFadeSlideRoute(const WalletsScreen()));
+              },
+              onSettingsTap: () {
+                Navigator.of(
+                  context,
+                ).pushReplacement(buildFadeSlideRoute(const SettingsScreen()));
+              },
+              onAiTap: () {
+                Navigator.of(
+                  context,
+                ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceHero extends StatelessWidget {
+  const _BalanceHero({required this.onAddTap});
+
+  final VoidCallback onAddTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0053DB), Color(0xFF0E67F2)],
+        ),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x330053DB),
+            blurRadius: 28,
+            offset: Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tổng số dư',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xCCFFFFFF),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '42.500.000₫',
+                    style: GoogleFonts.manrope(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.2,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.trending_up_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '+12.4%',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: const [
+              Expanded(
+                child: _PocketStat(
+                  title: 'Tiền mặt',
+                  value: '2.500.000₫',
+                  icon: Icons.account_balance_wallet_outlined,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: _PocketStat(
+                  title: 'Ngân hàng',
+                  value: '40.000.000₫',
+                  icon: Icons.account_balance_outlined,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onAddTap,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: Text(
+                    'Thêm chi tiêu',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Tháng 4, 2026',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PocketStat extends StatelessWidget {
+  const _PocketStat({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withValues(alpha: 0.88),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: GoogleFonts.manrope(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeeklyOverviewCard extends StatelessWidget {
+  const _WeeklyOverviewCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F3FF),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Chi tiêu tuần này',
+                style: GoogleFonts.manrope(
+                  color: const Color(0xFF113069),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  '7 ngày',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0053DB),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '8.450.000₫',
+            style: GoogleFonts.manrope(
+              color: const Color(0xFF113069),
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Tăng 6.2% so với tuần trước',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF445D99),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 176,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: const [
+                _WeekBar(
+                  day: 'Mon',
+                  amount: '620K',
+                  height: 48,
+                  color: Color(0x400053DB),
+                ),
+                _WeekBar(
+                  day: 'Tue',
+                  amount: '1.8M',
+                  height: 128,
+                  color: Color(0xA30053DB),
+                ),
+                _WeekBar(
+                  day: 'Wed',
+                  amount: '1.2M',
+                  height: 92,
+                  color: Color(0x6E0053DB),
+                ),
+                _WeekBar(
+                  day: 'Thu',
+                  amount: '2.1M',
+                  height: 152,
+                  color: Color(0xFF0053DB),
+                ),
+                _WeekBar(
+                  day: 'Fri',
+                  amount: '1.4M',
+                  height: 112,
+                  color: Color(0x990053DB),
+                ),
+                _WeekBar(
+                  day: 'Sat',
+                  amount: '950K',
+                  height: 74,
+                  color: Color(0x5C0053DB),
+                ),
+                _WeekBar(
+                  day: 'Sun',
+                  amount: '380K',
+                  height: 36,
+                  color: Color(0x330053DB),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekBar extends StatelessWidget {
+  const _WeekBar({
+    required this.day,
+    required this.amount,
+    required this.height,
+    required this.color,
+  });
+
+  final String day;
+  final String amount;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              amount,
+              style: GoogleFonts.inter(
+                color: const Color(0xFF6C82B3),
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              height: height,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              day,
+              style: GoogleFonts.inter(
+                color: const Color(0xFF445D99),
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsGrid extends StatelessWidget {
+  const _AnalyticsGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    const items = [
+      (
+        title: 'Tháng này',
+        value: '18.2M₫',
+        caption: 'Chiếm 43% tổng thu nhập',
+        color: Color(0xFFDBE1FF),
+        icon: Icons.payments_outlined,
+      ),
+      (
+        title: 'Tiết kiệm',
+        value: '9.8M₫',
+        caption: 'Đã đạt 81% mục tiêu tháng',
+        color: Color(0xFFDDFBE8),
+        icon: Icons.savings_outlined,
+      ),
+      (
+        title: 'Ăn uống',
+        value: '3.4M₫',
+        caption: 'Danh mục chi cao nhất',
+        color: Color(0xFFFFEDD5),
+        icon: Icons.restaurant_rounded,
+      ),
+      (
+        title: 'AI nhắc nhở',
+        value: '02',
+        caption: 'Gợi ý tối ưu ngân sách',
+        color: Color(0xFFF3E8FF),
+        icon: Icons.auto_awesome_outlined,
+      ),
+    ];
+
+    return Column(
+      children: [
+        for (var row = 0; row < 2; row++)
+          Padding(
+            padding: EdgeInsets.only(bottom: row == 0 ? 12 : 0),
+            child: Row(
+              children: [
+                for (var column = 0; column < 2; column++) ...[
+                  Expanded(
+                    child: _AnalyticsCard(
+                      title: items[row * 2 + column].title,
+                      value: items[row * 2 + column].value,
+                      caption: items[row * 2 + column].caption,
+                      color: items[row * 2 + column].color,
+                      icon: items[row * 2 + column].icon,
+                    ),
+                  ),
+                  if (column == 0) const SizedBox(width: 12),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _AnalyticsCard extends StatelessWidget {
+  const _AnalyticsCard({
+    required this.title,
+    required this.value,
+    required this.caption,
+    required this.color,
+    required this.icon,
+  });
+
+  final String title;
+  final String value;
+  final String caption;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0x1498B1F2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: const Color(0xFF113069)),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF445D99),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: GoogleFonts.manrope(
+              color: const Color(0xFF113069),
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.8,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            caption,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF6C82B3),
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String title;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.manrope(
+            color: const Color(0xFF113069),
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const Spacer(),
+        TextButton(
+          onPressed: onTap,
+          child: Text(
+            actionLabel,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF0053DB),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RecentTransactionsCard extends StatelessWidget {
+  const _RecentTransactionsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    const transactions = [
+      (
+        title: 'Bún bò trưa',
+        category: 'Ăn uống',
+        amount: '-85.000₫',
+        time: 'Hôm nay • 12:45',
+        background: Color(0xFFFFEDD5),
+        icon: Icons.restaurant_rounded,
+      ),
+      (
+        title: 'Đổ xăng',
+        category: 'Di chuyển',
+        amount: '-120.000₫',
+        time: 'Hôm nay • 08:10',
+        background: Color(0xFFD9E2FF),
+        icon: Icons.local_gas_station_outlined,
+      ),
+      (
+        title: 'Lương tháng 4',
+        category: 'Thu nhập',
+        amount: '+25.000.000₫',
+        time: '08/04 • 09:00',
+        background: Color(0xFFDDFBE8),
+        icon: Icons.payments_outlined,
+      ),
+      (
+        title: 'Mua đồ gia dụng',
+        category: 'Mua sắm',
+        amount: '-640.000₫',
+        time: '07/04 • 20:21',
+        background: Color(0xFFFCE7F3),
+        icon: Icons.shopping_bag_outlined,
+      ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F113069),
+            blurRadius: 16,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (var index = 0; index < transactions.length; index++) ...[
+            _TransactionRow(
+              title: transactions[index].title,
+              category: transactions[index].category,
+              amount: transactions[index].amount,
+              time: transactions[index].time,
+              background: transactions[index].background,
+              icon: transactions[index].icon,
+            ),
+            if (index != transactions.length - 1)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(height: 1, color: Color(0x1498B1F2)),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TransactionRow extends StatelessWidget {
+  const _TransactionRow({
+    required this.title,
+    required this.category,
+    required this.amount,
+    required this.time,
+    required this.background,
+    required this.icon,
+  });
+
+  final String title;
+  final String category;
+  final String amount;
+  final String time;
+  final Color background;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final positive = amount.startsWith('+');
+    return Row(
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: const Color(0xFF113069)),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  color: const Color(0xFF113069),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$category • $time',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF6C82B3),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          amount,
+          style: GoogleFonts.manrope(
+            color: positive ? const Color(0xFF0C8A5D) : const Color(0xFF113069),
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
