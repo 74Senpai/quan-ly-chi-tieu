@@ -22,11 +22,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsStateData _settings;
+  late List<ManagedCategory> _expenseCategories;
+  late List<ManagedCategory> _incomeCategories;
 
   @override
   void initState() {
     super.initState();
     _settings = widget.initialState ?? SettingsDemoData.initial();
+    _expenseCategories = SettingsDemoData.initialExpenseCategories();
+    _incomeCategories = SettingsDemoData.initialIncomeCategories();
   }
 
   Future<void> _openGeneralSettings() async {
@@ -44,6 +48,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (result != null && mounted) {
       setState(() => _settings = result);
+    }
+  }
+
+  Future<void> _openCategoryManager() async {
+    final result = await Navigator.of(context).push<CategoryManagerResult>(
+      buildFadeSlideRoute(
+        CategoryManagerScreen(
+          expenseCategories: _expenseCategories,
+          incomeCategories: _incomeCategories,
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _expenseCategories = result.expenseCategories;
+        _incomeCategories = result.incomeCategories;
+      });
     }
   }
 
@@ -115,10 +136,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _SettingsRow(
                               icon: Icons.grid_view_rounded,
                               title: 'Quản lý Danh mục',
-                              subtitle: 'Nhóm chi tiêu, thu nhập, nhãn',
+                              subtitle:
+                                  '${_expenseCategories.length + _incomeCategories.length} danh mục • thêm và xóa',
                               color: const Color(0xFFE9F8EF),
-                              onTap: () =>
-                                  _showPlaceholderMessage('Quản lý Danh mục'),
+                              onTap: _openCategoryManager,
                             ),
                             _SettingsRow(
                               icon: Icons.auto_awesome_mosaic_rounded,
@@ -186,6 +207,577 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   context,
                 ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CategoryEditorResult {
+  const CategoryEditorResult({this.category, this.deleteId});
+
+  final ManagedCategory? category;
+  final String? deleteId;
+}
+
+class CategoryEditorScreen extends StatefulWidget {
+  const CategoryEditorScreen({
+    super.key,
+    required this.initialType,
+    this.category,
+  });
+
+  final ManagedCategoryType initialType;
+  final ManagedCategory? category;
+
+  @override
+  State<CategoryEditorScreen> createState() => _CategoryEditorScreenState();
+}
+
+class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
+  late ManagedCategoryType _type;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
+  late String _emoji;
+  late Color _color;
+
+  bool get _isEditing => widget.category != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.category?.type ?? widget.initialType;
+    _emoji = widget.category?.emoji ?? SettingsDemoData.iconChoices.first;
+    _color = _resolveBaseColor(
+      widget.category?.color ?? SettingsDemoData.colorChoices.first,
+    );
+    _nameController.text = widget.category?.name ?? '';
+    _limitController.text = widget.category?.monthlyLimit?.toString() ?? '';
+    _nameController.addListener(() => setState(() {}));
+    _limitController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _limitController.dispose();
+    super.dispose();
+  }
+
+  int? get _monthlyLimit {
+    final cleaned = _limitController.text.replaceAll('.', '').trim();
+    return cleaned.isEmpty ? null : int.tryParse(cleaned);
+  }
+
+  String get _namePreview => _nameController.text.trim().isEmpty
+      ? 'Tên danh mục'
+      : _nameController.text.trim();
+
+  Color _resolveBaseColor(Color source) {
+    for (final option in SettingsDemoData.colorChoices) {
+      if (option.toARGB32() == source.toARGB32()) {
+        return option;
+      }
+    }
+    return Color(source.toARGB32());
+  }
+
+  void _submit() {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nhập tên danh mục trước khi lưu.')),
+      );
+      return;
+    }
+    Navigator.of(context).pop(
+      CategoryEditorResult(
+        category: ManagedCategory(
+          id:
+              widget.category?.id ??
+              '${_type.name}-${DateTime.now().millisecondsSinceEpoch}',
+          name: _nameController.text.trim(),
+          emoji: _emoji,
+          count: widget.category?.count ?? 0,
+          color: _color.withValues(alpha: 0.18),
+          type: _type,
+          monthlyLimit: _type == ManagedCategoryType.expense
+              ? _monthlyLimit
+              : null,
+          locked: widget.category?.locked ?? false,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteCategory() async {
+    if (widget.category == null || widget.category!.locked) {
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Xóa danh mục?',
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'Danh mục "${widget.category!.name}" sẽ bị xóa khỏi danh sách demo.',
+          style: GoogleFonts.inter(height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Hủy', style: GoogleFonts.manrope()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFF43F5E),
+            ),
+            child: Text('Xóa', style: GoogleFonts.manrope()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      Navigator.of(
+        context,
+      ).pop(CategoryEditorResult(deleteId: widget.category!.id));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF8FF),
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: HomeBackground()),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                  child: Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.of(context).pop(),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: Color(0xFF0053DB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isEditing ? 'Edit Category' : 'Thêm danh mục',
+                        style: GoogleFonts.manrope(
+                          color: const Color(0xFF113069),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (_isEditing)
+                        TextButton(
+                          onPressed: _submit,
+                          child: Text(
+                            'Save',
+                            style: GoogleFonts.manrope(
+                              color: const Color(0xFF2563EB),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (_isEditing)
+                          _EditPreviewCard(
+                            emoji: _emoji,
+                            name: _namePreview,
+                            color: _color,
+                          )
+                        else
+                          _AddPreviewCard(
+                            emoji: _emoji,
+                            name: _namePreview,
+                            type: _type,
+                            color: _color,
+                            monthlyLimit: _monthlyLimit,
+                          ),
+                        const SizedBox(height: 32),
+                        _InputLabel(
+                          label: 'Tên danh mục',
+                          trailing:
+                              '${_nameController.text.characters.length}/20',
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _nameController,
+                          maxLength: 20,
+                          decoration: _editorInputDecoration(
+                            hint: 'Ví dụ: Ăn uống, Di chuyển...',
+                          ).copyWith(counterText: ''),
+                        ),
+                        if (!_isEditing) ...[
+                          const SizedBox(height: 24),
+                          _InputLabel(label: 'Loại danh mục'),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: ManagedCategoryType.values.map((type) {
+                              final active = type == _type;
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: type == ManagedCategoryType.expense
+                                        ? 8
+                                        : 0,
+                                  ),
+                                  child: InkWell(
+                                    onTap: () => setState(() => _type = type),
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: active
+                                            ? const Color(0xFF0053DB)
+                                            : const Color(0xFFF2F3FF),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Text(
+                                        type.label,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.inter(
+                                          color: active
+                                              ? Colors.white
+                                              : const Color(0xFF445D99),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        _InputLabel(label: 'Chọn biểu tượng'),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: SettingsDemoData.iconChoices.map((emoji) {
+                            final active = emoji == _emoji;
+                            return InkWell(
+                              onTap: () => setState(() => _emoji = emoji),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF2F3FF),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: active
+                                      ? Border.all(
+                                          color: const Color(0xFF002BFF),
+                                        )
+                                      : null,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 26),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        _InputLabel(
+                          label: _isEditing ? 'Chọn màu sắc' : 'Bảng màu nền',
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: SettingsDemoData.colorChoices.map((color) {
+                            final active = color == _color;
+                            return InkWell(
+                              onTap: () => setState(() => _color = color),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: active
+                                      ? const [
+                                          BoxShadow(
+                                            color: Colors.white,
+                                            spreadRadius: 2,
+                                          ),
+                                          BoxShadow(
+                                            color: Color(0x332563EB),
+                                            spreadRadius: 6,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        if (_type == ManagedCategoryType.expense) ...[
+                          const SizedBox(height: 24),
+                          _InputLabel(label: 'Hạn mức ngân sách (tùy chọn)'),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _limitController,
+                            keyboardType: TextInputType.number,
+                            decoration: _editorInputDecoration(
+                              hint: 'Nhập số tiền',
+                              suffix: '/ tháng',
+                            ),
+                          ),
+                        ],
+                        if (_isEditing &&
+                            widget.category != null &&
+                            !widget.category!.locked) ...[
+                          const SizedBox(height: 28),
+                          Center(
+                            child: FilledButton.icon(
+                              onPressed: _deleteCategory,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFF43F5E),
+                                foregroundColor: Colors.black,
+                                minimumSize: const Size(220, 46),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(23),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                'Xóa danh mục',
+                                style: GoogleFonts.manrope(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    0,
+                    24,
+                    MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 32,
+                  ),
+                  child: PrimaryBlueButton(
+                    label: _isEditing ? 'Lưu thay đổi' : 'Thêm Danh mục',
+                    onTap: _submit,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddPreviewCard extends StatelessWidget {
+  const _AddPreviewCard({
+    required this.emoji,
+    required this.name,
+    required this.type,
+    required this.color,
+    this.monthlyLimit,
+  });
+
+  final String emoji;
+  final String name;
+  final ManagedCategoryType type;
+  final Color color;
+  final int? monthlyLimit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'THẺ XEM TRƯỚC',
+          style: GoogleFonts.inter(
+            color: const Color(0xFF7C95C8),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.4,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: const Color(0x1498B1F2)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0F113069),
+                blurRadius: 30,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Text(emoji, style: const TextStyle(fontSize: 28)),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      type.label,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF445D99),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '0 ₫',
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFF0053DB),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Hạn mức: ${monthlyLimit ?? '--'}',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EditPreviewCard extends StatelessWidget {
+  const _EditPreviewCard({
+    required this.emoji,
+    required this.name,
+    required this.color,
+  });
+
+  final String emoji;
+  final String name;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A113069),
+            blurRadius: 40,
+            offset: Offset(0, 20),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            alignment: Alignment.center,
+            child: Text(emoji, style: const TextStyle(fontSize: 36)),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'PREVIEW',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF445D99),
+              fontSize: 16,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            name,
+            style: GoogleFonts.manrope(
+              color: const Color(0xFF113069),
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -1169,6 +1761,711 @@ class _PinSuccessScreenState extends State<PinSuccessScreen> {
   }
 }
 
+class CategoryManagerScreen extends StatefulWidget {
+  const CategoryManagerScreen({
+    super.key,
+    required this.expenseCategories,
+    required this.incomeCategories,
+  });
+
+  final List<ManagedCategory> expenseCategories;
+  final List<ManagedCategory> incomeCategories;
+
+  @override
+  State<CategoryManagerScreen> createState() => _CategoryManagerScreenState();
+}
+
+class _CategoryManagerScreenState extends State<CategoryManagerScreen> {
+  late List<ManagedCategory> _expenseCategories;
+  late List<ManagedCategory> _incomeCategories;
+  ManagedCategoryType _activeType = ManagedCategoryType.expense;
+
+  @override
+  void initState() {
+    super.initState();
+    _expenseCategories = List.of(widget.expenseCategories);
+    _incomeCategories = List.of(widget.incomeCategories);
+  }
+
+  List<ManagedCategory> get _activeCategories =>
+      _activeType == ManagedCategoryType.expense
+      ? _expenseCategories
+      : _incomeCategories;
+
+  String get _sectionTitle => _activeType == ManagedCategoryType.expense
+      ? 'Tất cả danh mục'
+      : 'Danh mục thu nhập';
+
+  String? get _sectionSubtitle => _activeType == ManagedCategoryType.expense
+      ? null
+      : 'Theo dõi và tùy chỉnh các nguồn thu của bạn để quản lý dòng tiền hiệu quả hơn.';
+
+  Future<void> _openAddCategory() async {
+    final result = await Navigator.of(context).push<CategoryEditorResult>(
+      buildFadeSlideRoute(CategoryEditorScreen(initialType: _activeType)),
+    );
+    if (result == null || result.category == null || !mounted) {
+      return;
+    }
+    setState(() {
+      final category = result.category!;
+      final target = category.type == ManagedCategoryType.expense
+          ? _expenseCategories
+          : _incomeCategories;
+      target.insert(0, category);
+      _activeType = category.type;
+    });
+  }
+
+  Future<void> _openEditCategory(ManagedCategory category) async {
+    final result = await Navigator.of(context).push<CategoryEditorResult>(
+      buildFadeSlideRoute(
+        CategoryEditorScreen(initialType: category.type, category: category),
+      ),
+    );
+    if (result == null || !mounted) {
+      return;
+    }
+    setState(() {
+      final target = category.type == ManagedCategoryType.expense
+          ? _expenseCategories
+          : _incomeCategories;
+      if (result.deleteId != null) {
+        target.removeWhere((item) => item.id == result.deleteId);
+        return;
+      }
+      if (result.category == null) {
+        return;
+      }
+      final index = target.indexWhere((item) => item.id == result.category!.id);
+      if (index >= 0) {
+        target[index] = result.category!;
+      }
+    });
+  }
+
+  Future<void> _confirmDelete(ManagedCategory category) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0x33FE8983),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: Color(0xFF9F403D),
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Xóa danh mục?',
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF113069),
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Danh mục "${category.name}" sẽ bị gỡ khỏi danh sách quản lý demo.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                color: const Color(0xFF445D99),
+                fontSize: 14,
+                height: 1.55,
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Hủy',
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF445D99),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF9F403D),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Text(
+              'Xóa',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      setState(() {
+        final target = category.type == ManagedCategoryType.expense
+            ? _expenseCategories
+            : _incomeCategories;
+        target.removeWhere((item) => item.id == category.id);
+      });
+    }
+  }
+
+  void _closeWithResult() {
+    Navigator.of(context).pop(
+      CategoryManagerResult(
+        expenseCategories: _expenseCategories,
+        incomeCategories: _incomeCategories,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingsScaffold(
+      title: 'Quản lý Danh mục',
+      onBack: _closeWithResult,
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 180),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF2F3FF),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: ManagedCategoryType.values.map((type) {
+                      final active = type == _activeType;
+                      return Expanded(
+                        child: InkWell(
+                          onTap: () => setState(() => _activeType = type),
+                          borderRadius: BorderRadius.circular(12),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: active ? Colors.white : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: active
+                                  ? const [
+                                      BoxShadow(
+                                        color: Color(0x0D000000),
+                                        blurRadius: 2,
+                                        offset: Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Text(
+                              type.label,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                color: active
+                                    ? const Color(0xFF0053DB)
+                                    : const Color(0xFF445D99),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Text(
+                      _sectionTitle,
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: _activeType == ManagedCategoryType.expense
+                            ? 24
+                            : 30,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_activeType == ManagedCategoryType.expense)
+                      Text(
+                        '${_activeCategories.length} DANH MỤC',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF445D99),
+                          fontSize: 12,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                  ],
+                ),
+                if (_sectionSubtitle != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _sectionSubtitle!,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                for (final category in _activeCategories) ...[
+                  _ManagedCategoryTile(
+                    category: category,
+                    mode: _activeType == ManagedCategoryType.expense
+                        ? CategoryTileAction.delete
+                        : CategoryTileAction.edit,
+                    onTap: () => _openEditCategory(category),
+                    onAction: category.locked
+                        ? null
+                        : () => _activeType == ManagedCategoryType.expense
+                              ? _confirmDelete(category)
+                              : _openEditCategory(category),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (_activeType == ManagedCategoryType.expense)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDBE1FF),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Mẹo nhỏ',
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFF0048BF),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Phân loại giao dịch chính xác giúp bạn theo dõi chi tiêu hiệu quả hơn 25% mỗi tháng.',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xCC0048BF),
+                                  fontSize: 14,
+                                  height: 1.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.lightbulb_outline_rounded,
+                          color: Color(0xFF0053DB),
+                          size: 34,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 24,
+            bottom: 116,
+            child: FloatingActionButton(
+              onPressed: _openAddCategory,
+              backgroundColor: const Color(0xFF0053DB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AddCategoryScreen extends StatefulWidget {
+  const AddCategoryScreen({super.key, required this.initialType});
+
+  final ManagedCategoryType initialType;
+
+  @override
+  State<AddCategoryScreen> createState() => _AddCategoryScreenState();
+}
+
+class _AddCategoryScreenState extends State<AddCategoryScreen> {
+  late ManagedCategoryType _type;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
+  late String _emoji;
+  late Color _color;
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType;
+    _emoji = SettingsDemoData.iconChoices.first;
+    _color = SettingsDemoData.colorChoices.first;
+    _nameController.addListener(() => setState(() {}));
+    _limitController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _limitController.dispose();
+    super.dispose();
+  }
+
+  int? get _monthlyLimit {
+    final cleaned = _limitController.text.replaceAll('.', '').trim();
+    return cleaned.isEmpty ? null : int.tryParse(cleaned);
+  }
+
+  String get _namePreview => _nameController.text.trim().isEmpty
+      ? 'Tên danh mục'
+      : _nameController.text.trim();
+
+  void _submit() {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nhập tên danh mục trước khi lưu.')),
+      );
+      return;
+    }
+    Navigator.of(context).pop(
+      ManagedCategory(
+        id: '${_type.name}-${DateTime.now().millisecondsSinceEpoch}',
+        name: _nameController.text.trim(),
+        emoji: _emoji,
+        count: 0,
+        color: _color.withValues(alpha: 0.18),
+        type: _type,
+        monthlyLimit: _monthlyLimit,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF8FF),
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: HomeBackground()),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                  child: Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.of(context).pop(),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: Color(0xFF0053DB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Thêm danh mục',
+                        style: GoogleFonts.manrope(
+                          color: const Color(0xFF113069),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'THẺ XEM TRƯỚC',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF7C95C8),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(color: const Color(0x1498B1F2)),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x0F113069),
+                                blurRadius: 30,
+                                offset: Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: _color.withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  _emoji,
+                                  style: const TextStyle(fontSize: 28),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _namePreview,
+                                      style: GoogleFonts.manrope(
+                                        color: const Color(0xFF113069),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _type.label,
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFF445D99),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '0 ₫',
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF0053DB),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Hạn mức: ${_monthlyLimit ?? '--'}',
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFF445D99),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        _InputLabel(
+                          label: 'Tên danh mục',
+                          trailing:
+                              '${_nameController.text.characters.length}/20',
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _nameController,
+                          maxLength: 20,
+                          decoration: _editorInputDecoration(
+                            hint: 'Ví dụ: Ăn uống, Di chuyển...',
+                          ).copyWith(counterText: ''),
+                        ),
+                        const SizedBox(height: 24),
+                        _InputLabel(label: 'Loại danh mục'),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: ManagedCategoryType.values.map((type) {
+                            final active = type == _type;
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  right: type == ManagedCategoryType.expense
+                                      ? 8
+                                      : 0,
+                                ),
+                                child: InkWell(
+                                  onTap: () => setState(() => _type = type),
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: active
+                                          ? const Color(0xFF0053DB)
+                                          : const Color(0xFFF2F3FF),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Text(
+                                      type.label,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        color: active
+                                            ? Colors.white
+                                            : const Color(0xFF445D99),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        _InputLabel(label: 'Chọn biểu tượng'),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: SettingsDemoData.iconChoices.map((emoji) {
+                            final active = emoji == _emoji;
+                            return InkWell(
+                              onTap: () => setState(() => _emoji = emoji),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF2F3FF),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: active
+                                      ? Border.all(
+                                          color: const Color(0xFF002BFF),
+                                        )
+                                      : null,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 26),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        _InputLabel(label: 'Bảng màu nền'),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: SettingsDemoData.colorChoices.map((color) {
+                            final active = color == _color;
+                            return InkWell(
+                              onTap: () => setState(() => _color = color),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: active
+                                      ? const [
+                                          BoxShadow(
+                                            color: Color(0xFFFFFFFF),
+                                            spreadRadius: 2,
+                                          ),
+                                          BoxShadow(
+                                            color: Color(0x332563EB),
+                                            spreadRadius: 6,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        _InputLabel(label: 'Hạn mức ngân sách (tùy chọn)'),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _limitController,
+                          keyboardType: TextInputType.number,
+                          decoration: _editorInputDecoration(
+                            hint: 'Nhập số tiền',
+                            suffix: '/ tháng',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    0,
+                    24,
+                    MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 32,
+                  ),
+                  child: PrimaryBlueButton(
+                    label: 'Thêm Danh mục',
+                    onTap: _submit,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SettingsScaffold extends StatelessWidget {
   const _SettingsScaffold({
     required this.title,
@@ -1266,6 +2563,226 @@ class _SettingsScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+enum CategoryTileAction { delete, edit }
+
+class _ManagedCategoryTile extends StatelessWidget {
+  const _ManagedCategoryTile({
+    required this.category,
+    required this.mode,
+    this.onTap,
+    this.onAction,
+  });
+
+  final ManagedCategory category;
+  final CategoryTileAction mode;
+  final VoidCallback? onTap;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: category.locked ? const Color(0x80F2F3FF) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: mode == CategoryTileAction.edit
+                  ? const Color(0xFFE2E7FF)
+                  : Colors.transparent,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: category.color,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  category.emoji,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          category.name,
+                          style: GoogleFonts.manrope(
+                            color: category.locked
+                                ? const Color(0x99113069)
+                                : const Color(0xFF113069),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (category.locked) ...[
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.lock_outline_rounded,
+                            color: Color(0x99445D99),
+                            size: 15,
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (mode == CategoryTileAction.edit)
+                      Text(
+                        '${category.count} giao dịch${category.count > 0 ? ' trong tháng' : ''}',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF445D99),
+                          fontSize: 12,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (mode == CategoryTileAction.delete)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: category.locked
+                        ? const Color(0xFFEAEDFF)
+                        : const Color(0xFFE2E7FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${category.count}',
+                    style: GoogleFonts.inter(
+                      color: category.locked
+                          ? const Color(0x80445D99)
+                          : const Color(0xFF445D99),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              else
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF8AA8FF),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (onAction == null) {
+      return content;
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Dismissible(
+        key: ValueKey('${category.id}-${mode.name}'),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (_) async {
+          onAction?.call();
+          return false;
+        },
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 26),
+          decoration: BoxDecoration(
+            color: mode == CategoryTileAction.delete
+                ? const Color(0xFF9F403D)
+                : const Color(0xFF0053DB),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            mode == CategoryTileAction.delete
+                ? Icons.delete_outline_rounded
+                : Icons.edit_outlined,
+            color: Colors.white,
+          ),
+        ),
+        child: content,
+      ),
+    );
+  }
+}
+
+class _InputLabel extends StatelessWidget {
+  const _InputLabel({required this.label, this.trailing});
+
+  final String label;
+  final String? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.manrope(
+            color: const Color(0xFF113069),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Spacer(),
+        if (trailing != null)
+          Text(
+            trailing!,
+            style: GoogleFonts.inter(
+              color: const Color(0x80445D99),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+InputDecoration _editorInputDecoration({required String hint, String? suffix}) {
+  return InputDecoration(
+    hintText: hint,
+    hintStyle: GoogleFonts.manrope(
+      color: const Color(0x66445D99),
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+    suffixText: suffix,
+    suffixStyle: GoogleFonts.manrope(
+      color: const Color(0xFF445D99),
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+    ),
+    filled: true,
+    fillColor: const Color(0xFFE2E7FF),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFF0053DB), width: 1.6),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+  );
 }
 
 class _SettingsProfileCard extends StatelessWidget {

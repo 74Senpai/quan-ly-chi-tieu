@@ -1,11 +1,21 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/navigation/app_routes.dart';
+import '../../../ai/presentation/screens/ai_suggestions_screen.dart';
 import '../../../ai/presentation/screens/assistant_landing_screen.dart';
+import '../../../budgets/data/budget_demo_data.dart' as budgets;
+import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../calendar/presentation/screens/calendar_screen.dart';
+import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
+import '../../../savings/presentation/screens/savings_analysis_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../debts/presentation/screens/debt_book_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
+import '../../../transactions/presentation/screens/income_expense_report_screen.dart';
+import '../../../transactions/presentation/screens/spending_structure_screen.dart';
 import '../../../wallets/presentation/screens/wallets_screen.dart';
 import '../widgets/home_components.dart';
 
@@ -23,6 +33,20 @@ class DashboardScreen extends StatelessWidget {
           const SnackBar(content: Text('Giao dịch đã được lưu vào ví chính.')),
         );
     }
+  }
+
+  void _openBudgets(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(buildFadeSlideRoute(const BudgetOverviewScreen()));
+  }
+
+  void _showComingSoon(BuildContext context, String featureName) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('$featureName đang được hoàn thiện.')),
+      );
   }
 
   @override
@@ -45,6 +69,10 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         const _WeeklyOverviewCard(),
                         const SizedBox(height: 20),
+                        _BudgetDashboardSection(
+                          onTap: () => _openBudgets(context),
+                        ),
+                        const SizedBox(height: 20),
                         const _AnalyticsGrid(),
                         const SizedBox(height: 20),
                         _SectionHeader(
@@ -54,6 +82,103 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         const _RecentTransactionsCard(),
+                        const SizedBox(height: 20),
+                        _FeatureMenuSection(
+                          items: [
+                            _FeatureMenuItem(
+                              title: 'Thu Chi',
+                              subtitle:
+                                  'Biến động dòng tiền, theo dõi giao dịch.',
+                              icon: Icons.account_balance_wallet_outlined,
+                              iconBackground: const Color(0xFFE0EAFF),
+                              iconForeground: const Color(0xFF0053DB),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const IncomeExpenseReportScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Cơ cấu',
+                              subtitle: 'Tỉ lệ chi tiêu theo danh mục.',
+                              icon: Icons.pie_chart_outline_rounded,
+                              iconBackground: const Color(0xFFDDFBE8),
+                              iconForeground: const Color(0xFF0C8A5D),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const SpendingStructureScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Gợi ý AI',
+                              subtitle:
+                                  'Tư vấn và nhắc nhở chi tiêu thông minh.',
+                              icon: Icons.auto_awesome_outlined,
+                              iconBackground: const Color(0xFFF3E8FF),
+                              iconForeground: const Color(0xFF6D28D9),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const AiSuggestionsScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Tích lũy',
+                              subtitle: 'Theo dõi mục tiêu tiết kiệm.',
+                              icon: Icons.savings_outlined,
+                              iconBackground: const Color(0xFFFFEDD5),
+                              iconForeground: const Color(0xFFB45309),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const SavingsAnalysisScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Dự báo',
+                              subtitle: 'Dự báo tài chính 6 tháng tới.',
+                              icon: Icons.show_chart_rounded,
+                              iconBackground: const Color(0xFFDBE1FF),
+                              iconForeground: const Color(0xFF113069),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const FinancialForecastScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Sổ Nợ',
+                              subtitle: 'Quản lý các khoản vay, nợ.',
+                              icon: Icons.receipt_long_outlined,
+                              iconBackground: const Color(0xFFFFE4E6),
+                              iconForeground: const Color(0xFF9F403D),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(const DebtBookScreen()),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Hạn mức',
+                              subtitle: 'Quản lý hạn mức chi tiêu.',
+                              icon: Icons.tune_rounded,
+                              iconBackground: const Color(0xFFE2E7FF),
+                              iconForeground: const Color(0xFF113069),
+                              onTap: () => _openBudgets(context),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -107,6 +232,115 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FeatureMenuItem {
+  const _FeatureMenuItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconBackground,
+    required this.iconForeground,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color iconBackground;
+  final Color iconForeground;
+  final VoidCallback onTap;
+}
+
+class _FeatureMenuSection extends StatelessWidget {
+  const _FeatureMenuSection({required this.items});
+
+  final List<_FeatureMenuItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var index = 0; index < items.length; index++) ...[
+          _FeatureMenuTile(item: items[index]),
+          if (index != items.length - 1) const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _FeatureMenuTile extends StatelessWidget {
+  const _FeatureMenuTile({required this.item});
+
+  final _FeatureMenuItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: item.onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A113069),
+                blurRadius: 18,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: item.iconBackground,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(item.icon, color: item.iconForeground, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF6C82B3),
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF6C82B3)),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -484,6 +718,202 @@ class _WeekBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BudgetDashboardSection extends StatelessWidget {
+  const _BudgetDashboardSection({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<budgets.BudgetLimit>>(
+      valueListenable: budgets.BudgetStore.instance,
+      builder: (context, budgetItems, _) {
+        final store = budgets.BudgetStore.instance;
+        final highlighted = budgetItems.take(3).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionHeader(
+              title: 'Hạn mức ngân sách',
+              actionLabel: 'Xem tất cả',
+              onTap: onTap,
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(32),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF0053DB), Color(0xFF0048C1)],
+                  ),
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x290053DB),
+                      blurRadius: 24,
+                      offset: Offset(0, 14),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TỔNG NGÂN SÁCH',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xCCF8F7FF),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                budgets.formatCurrency(store.totalBudget),
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFFF8F7FF),
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.9,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            '${(store.overallProgress * 100).round()}%',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Đã chi: ${budgets.formatCurrency(store.totalSpent)}',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Còn lại: ${budgets.formatCurrency(store.totalRemaining)}',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF6FFBBE),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LinearProgressIndicator(
+                        value: store.overallProgress.clamp(0.0, 1.0),
+                        minHeight: 8,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation(
+                          Color(0xFF6FFBBE),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    for (
+                      var index = 0;
+                      index < highlighted.length;
+                      index++
+                    ) ...[
+                      _BudgetSnapshotRow(budget: highlighted[index]),
+                      if (index != highlighted.length - 1)
+                        const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BudgetSnapshotRow extends StatelessWidget {
+  const _BudgetSnapshotRow({required this.budget});
+
+  final budgets.BudgetLimit budget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(budget.template.icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                budget.template.name,
+                style: GoogleFonts.manrope(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${budget.usagePercent}% • ${budgets.formatCurrency(budget.limitAmount)}',
+                style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          budgets.formatCurrency(math.max(0, budget.remainingAmount)),
+          style: GoogleFonts.inter(
+            color: const Color(0xFF6FFBBE),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

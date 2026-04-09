@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum AppLanguage {
   vietnamese('Tiếng Việt', 'Vietnamese', '🇻🇳'),
   english('English', 'Tiếng Anh', '🇺🇸'),
@@ -112,4 +114,190 @@ class SettingsDemoData {
       hideSensitiveNotifications: false,
     );
   }
+
+  static List<ManagedCategory> initialExpenseCategories() {
+    return const [
+      ManagedCategory(
+        id: 'expense-food',
+        name: 'Ăn uống',
+        emoji: '🍔',
+        count: 12,
+        color: Color(0xFFFFEDD5),
+        type: ManagedCategoryType.expense,
+      ),
+      ManagedCategory(
+        id: 'expense-home',
+        name: 'Nhà cửa',
+        emoji: '🏠',
+        count: 4,
+        color: Color(0xFFDBEAFE),
+        type: ManagedCategoryType.expense,
+      ),
+      ManagedCategory(
+        id: 'expense-transport',
+        name: 'Di chuyển',
+        emoji: '🚗',
+        count: 8,
+        color: Color(0xFFD9E2FF),
+        type: ManagedCategoryType.expense,
+      ),
+      ManagedCategory(
+        id: 'expense-shopping',
+        name: 'Mua sắm',
+        emoji: '🛍️',
+        count: 15,
+        color: Color(0xFFFCE7F3),
+        type: ManagedCategoryType.expense,
+      ),
+      ManagedCategory(
+        id: 'expense-entertainment',
+        name: 'Giải trí',
+        emoji: '🎮',
+        count: 6,
+        color: Color(0xFFF3E8FF),
+        type: ManagedCategoryType.expense,
+      ),
+      ManagedCategory(
+        id: 'expense-other',
+        name: 'Khác',
+        emoji: '📦',
+        count: 2,
+        color: Color(0xFFE0E7FF),
+        type: ManagedCategoryType.expense,
+        locked: true,
+      ),
+    ];
+  }
+
+  static List<ManagedCategory> initialIncomeCategories() {
+    return const [
+      ManagedCategory(
+        id: 'income-salary',
+        name: 'Lương',
+        emoji: '💼',
+        count: 3,
+        color: Color(0xFFDDFBE8),
+        type: ManagedCategoryType.income,
+      ),
+      ManagedCategory(
+        id: 'income-bonus',
+        name: 'Thưởng',
+        emoji: '🎁',
+        count: 2,
+        color: Color(0xFFFFEDD5),
+        type: ManagedCategoryType.income,
+      ),
+      ManagedCategory(
+        id: 'income-invest',
+        name: 'Đầu tư',
+        emoji: '📈',
+        count: 1,
+        color: Color(0xFFDBEAFE),
+        type: ManagedCategoryType.income,
+      ),
+      ManagedCategory(
+        id: 'income-other',
+        name: 'Khác',
+        emoji: '✨',
+        count: 1,
+        color: Color(0xFFF3E8FF),
+        type: ManagedCategoryType.income,
+        locked: true,
+      ),
+    ];
+  }
+
+  static const iconChoices = [
+    '🍔',
+    '🚗',
+    '🏠',
+    '🛍️',
+    '🎬',
+    '💊',
+    '🎓',
+    '✈️',
+    '🎁',
+    '💡',
+    '💼',
+    '📈',
+  ];
+
+  static const colorChoices = [
+    Color(0xFF2563EB),
+    Color(0xFF059669),
+    Color(0xFFF43F5E),
+    Color(0xFFF59E0B),
+    Color(0xFF6366F1),
+    Color(0xFF8B5CF6),
+    Color(0xFF06B6D4),
+    Color(0xFF14B8A6),
+    Color(0xFFF97316),
+    Color(0xFFEC4899),
+    Color(0xFF475569),
+    Color(0xFF84CC16),
+  ];
+}
+
+enum ManagedCategoryType { expense, income }
+
+extension ManagedCategoryTypeX on ManagedCategoryType {
+  String get label =>
+      this == ManagedCategoryType.expense ? 'Chi tiêu' : 'Thu nhập';
+}
+
+class ManagedCategory {
+  const ManagedCategory({
+    required this.id,
+    required this.name,
+    required this.emoji,
+    required this.count,
+    required this.color,
+    required this.type,
+    this.monthlyLimit,
+    this.locked = false,
+  });
+
+  final String id;
+  final String name;
+  final String emoji;
+  final int count;
+  final Color color;
+  final ManagedCategoryType type;
+  final int? monthlyLimit;
+  final bool locked;
+
+  ManagedCategory copyWith({
+    String? id,
+    String? name,
+    String? emoji,
+    int? count,
+    Color? color,
+    ManagedCategoryType? type,
+    int? monthlyLimit,
+    bool clearMonthlyLimit = false,
+    bool? locked,
+  }) {
+    return ManagedCategory(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      emoji: emoji ?? this.emoji,
+      count: count ?? this.count,
+      color: color ?? this.color,
+      type: type ?? this.type,
+      monthlyLimit: clearMonthlyLimit
+          ? null
+          : (monthlyLimit ?? this.monthlyLimit),
+      locked: locked ?? this.locked,
+    );
+  }
+}
+
+class CategoryManagerResult {
+  const CategoryManagerResult({
+    required this.expenseCategories,
+    required this.incomeCategories,
+  });
+
+  final List<ManagedCategory> expenseCategories;
+  final List<ManagedCategory> incomeCategories;
 }
