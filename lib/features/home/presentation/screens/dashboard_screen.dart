@@ -615,7 +615,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 176,
+            height: 220,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: const [
@@ -699,7 +699,7 @@ class _WeekBar extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Container(
               height: height,
               decoration: BoxDecoration(
@@ -707,7 +707,7 @@ class _WeekBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               day,
               style: GoogleFonts.inter(

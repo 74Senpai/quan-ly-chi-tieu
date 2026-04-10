@@ -60,15 +60,17 @@ class AiIdleInvestmentScreen extends StatelessWidget {
                         const SizedBox(height: 26),
                         Row(
                           children: [
-                            Text(
-                              'Ước tính lợi nhuận',
-                              style: GoogleFonts.manrope(
-                                color: const Color(0xFF113069),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: Text(
+                                'Ước tính lợi nhuận',
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFF113069),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: 8),
                             Text(
                               'DỰA TRÊN 6.0%/NĂM',
                               style: GoogleFonts.inter(
@@ -283,12 +285,17 @@ class _InsightCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Tối ưu hóa ngay',
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFFF8F7FF),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                  Flexible(
+                    child: Text(
+                      'Tối ưu hóa ngay',
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFF8F7FF),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),

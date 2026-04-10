@@ -45,12 +45,14 @@ class BudgetOverviewScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             Row(
                               children: [
-                                Text(
-                                  'Hạn mức chi tiết',
-                                  style: GoogleFonts.manrope(
-                                    color: const Color(0xFF113069),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
+                                Expanded(
+                                  child: Text(
+                                    'Hạn mức chi tiết',
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF113069),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
@@ -717,21 +719,28 @@ class _BudgetListCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Text(
-                  'Đã dùng ${budget.usagePercent}%',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF445D99),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    'Đã dùng ${budget.usagePercent}%',
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  'Hạn mức: ${formatCurrency(budget.limitAmount)}',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF445D99),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    'Hạn mức: ${formatCurrency(budget.limitAmount)}',
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -1032,9 +1041,12 @@ class _BudgetPreviewCard extends StatelessWidget {
           const SizedBox(height: 24),
           Row(
             children: [
-              Text(
-                'Đã chi: ${formatCurrency(spentAmount)}',
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+              Expanded(
+                child: Text(
+                  'Đã chi: ${formatCurrency(spentAmount)}',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                ),
               ),
               const Spacer(),
               Text(

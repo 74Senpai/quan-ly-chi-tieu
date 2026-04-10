@@ -1482,26 +1482,28 @@ class _HeroMetric extends StatelessWidget {
           child: Icon(icon, color: Colors.white, size: 18),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 12,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

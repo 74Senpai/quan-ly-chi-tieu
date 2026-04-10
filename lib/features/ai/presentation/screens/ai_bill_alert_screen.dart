@@ -61,12 +61,14 @@ class AiBillAlertScreen extends StatelessWidget {
                         const SizedBox(height: 22),
                         Row(
                           children: [
-                            Text(
-                              'Sắp đến hạn',
-                              style: GoogleFonts.manrope(
-                                color: const Color(0xFF113069),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: Text(
+                                'Sắp đến hạn',
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFF113069),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -264,6 +266,8 @@ class _AlertCard extends StatelessWidget {
               child: Text(
                 'Xem xét mức tiêu thụ năng\nlượng',
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
                 style: GoogleFonts.manrope(
                   color: const Color(0xFFF8F7FF),
                   fontSize: 16,
@@ -487,12 +491,16 @@ class _BillTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                amount,
-                style: GoogleFonts.manrope(
-                  color: const Color(0xFF113069),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: Text(
+                  amount,
+                  overflow: TextOverflow.fade,
+                  softWrap: false,
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],

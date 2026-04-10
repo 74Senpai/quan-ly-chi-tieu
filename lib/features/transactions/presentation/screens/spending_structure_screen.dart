@@ -164,13 +164,16 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          Text(
-            'Cơ cấu thu chi',
-            style: GoogleFonts.manrope(
-              color: const Color(0xFF0F172A),
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
+          Expanded(
+            child: Text(
+              'Cơ cấu thu chi',
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF0F172A),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
         ],
@@ -209,13 +212,16 @@ class _MonthSelector extends StatelessWidget {
               color: const Color(0xFF113069),
             ),
             const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.manrope(
-                color: const Color(0xFF113069),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.manrope(
+                  color: const Color(0xFF113069),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                ),
               ),
             ),
             const SizedBox(width: 4),

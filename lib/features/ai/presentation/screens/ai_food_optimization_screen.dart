@@ -75,12 +75,14 @@ class AiFoodOptimizationScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             Row(
                               children: [
-                                Text(
-                                  'So sánh chi tiêu',
-                                  style: GoogleFonts.manrope(
-                                    color: const Color(0xFF113069),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
+                                Expanded(
+                                  child: Text(
+                                    'So sánh chi tiêu',
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF113069),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
@@ -493,6 +495,8 @@ class _BottomCta extends StatelessWidget {
         label: Text(
           label,
           textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
           style: GoogleFonts.inter(
             color: const Color(0xFFF8F7FF),
             fontSize: 16,

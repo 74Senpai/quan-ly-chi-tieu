@@ -138,11 +138,16 @@ class PrimaryBlueButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: GoogleFonts.manrope(
-                    color: const Color(0xFFF8F7FF),
-                    fontSize: 18,
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFFF8F7FF),
+                      fontSize: 18,
+                    ),
                   ),
                 ),
                 if (icon != null) ...[
@@ -183,6 +188,9 @@ class OutlineBlueButton extends StatelessWidget {
         ),
         child: Text(
           label,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
           style: GoogleFonts.manrope(
             color: const Color(0xFF0053DB),
             fontSize: 16,
