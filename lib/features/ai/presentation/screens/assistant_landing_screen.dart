@@ -7,6 +7,11 @@ import '../../data/ai_demo_data.dart';
 import '../widgets/assistant_components.dart';
 import 'camera_capture_demo_screen.dart';
 import 'voice_listening_screen.dart';
+import '../../../home/presentation/screens/dashboard_screen.dart';
+import '../../../calendar/presentation/screens/calendar_screen.dart';
+import '../../../wallets/presentation/screens/wallets_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 class AssistantLandingScreen extends StatefulWidget {
   const AssistantLandingScreen({super.key});
@@ -72,6 +77,31 @@ class _AssistantLandingScreenState extends State<AssistantLandingScreen> {
         Navigator.of(
           context,
         ).push(buildFadeSlideRoute(const CameraCaptureDemoScreen()));
+      },
+      onDashboardTap: () {
+        Navigator.of(context).pushReplacement(
+          buildFadeSlideRoute(const DashboardScreen()),
+        );
+      },
+      onCalendarTap: () {
+        Navigator.of(context).pushReplacement(
+          buildFadeSlideRoute(const CalendarScreen()),
+        );
+      },
+      onWalletsTap: () {
+        Navigator.of(context).pushReplacement(
+          buildFadeSlideRoute(const WalletsScreen()),
+        );
+      },
+      onSettingsTap: () {
+        Navigator.of(context).pushReplacement(
+          buildFadeSlideRoute(const SettingsScreen()),
+        );
+      },
+      onNotificationTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+        );
       },
     );
   }
