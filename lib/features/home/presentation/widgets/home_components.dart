@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 class HomeBackground extends StatelessWidget {
   const HomeBackground({super.key, this.showTexture = false});
@@ -379,9 +380,22 @@ class TopBrandBar extends StatelessWidget {
                 ],
               )
             else
-              const Icon(
-                Icons.notifications_none_rounded,
-                color: Color(0xFF0053DB),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: Color(0xFF0053DB),
+                  ),
+                ),
               ),
           ],
         ),
