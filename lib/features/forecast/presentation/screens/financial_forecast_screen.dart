@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/navigation/app_routes.dart';
 import '../../../home/presentation/widgets/home_components.dart';
+import '../../../savings/presentation/screens/savings_analysis_screen.dart';
 
 class FinancialForecastScreen extends StatelessWidget {
   const FinancialForecastScreen({super.key});
@@ -113,15 +115,9 @@ class FinancialForecastScreen extends StatelessWidget {
                               );
                           },
                           onDetails: () {
-                            ScaffoldMessenger.of(context)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Chi tiết đang được hoàn thiện.',
-                                  ),
-                                ),
-                              );
+                            Navigator.of(context).push(
+                              buildFadeSlideRoute(const SavingsAnalysisScreen()),
+                            );
                           },
                         ),
                       ],

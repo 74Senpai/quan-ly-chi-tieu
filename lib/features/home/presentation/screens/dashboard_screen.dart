@@ -10,7 +10,7 @@ import '../../../budgets/data/budget_demo_data.dart' as budgets;
 import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../calendar/presentation/screens/calendar_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
-import '../../../savings/presentation/screens/savings_analysis_screen.dart';
+import '../../../savings/presentation/screens/savings_goals_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../debts/presentation/screens/debt_book_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
@@ -138,7 +138,7 @@ class DashboardScreen extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context).push(
                                   buildFadeSlideRoute(
-                                    const SavingsAnalysisScreen(),
+                                    const SavingsGoalsScreen(),
                                   ),
                                 );
                               },

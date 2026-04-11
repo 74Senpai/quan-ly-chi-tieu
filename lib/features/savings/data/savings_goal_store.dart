@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 enum SavingsTransactionType { deposit, withdraw }
 
@@ -19,6 +20,7 @@ class SavingsTransaction {
   final String? source;
   final String? note;
 }
+
 
 class SavingsGoal {
   const SavingsGoal({
