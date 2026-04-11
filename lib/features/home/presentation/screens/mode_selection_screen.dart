@@ -4,7 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/navigation/app_routes.dart';
 import '../../../ai/presentation/screens/assistant_landing_screen.dart';
 import '../widgets/home_components.dart';
-import 'dashboard_screen.dart';
+import 'main_navigation_shell.dart';
+import 'mode_selection_screen.dart';
 
 class ModeSelectionScreen extends StatelessWidget {
   const ModeSelectionScreen({super.key});
@@ -15,7 +16,7 @@ class ModeSelectionScreen extends StatelessWidget {
     );
     Navigator.of(
       context,
-    ).pushReplacement(buildFadeSlideRoute(const DashboardScreen()));
+    ).pushReplacement(buildFadeSlideRoute(const MainNavigationShell()));
   }
 
   @override
