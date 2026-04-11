@@ -44,6 +44,7 @@ class _AssistantLandingScreenState extends State<AssistantLandingScreen> {
   Widget build(BuildContext context) {
     return AssistantShell(
       title: 'Trợ lý AI',
+      showBottomBar: false,
       body: [
         const SizedBox(height: 22),
         AnimatedSwitcher(

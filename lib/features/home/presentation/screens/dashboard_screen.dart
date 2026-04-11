@@ -203,34 +203,6 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: HomeBottomNavigation(
-              activeTab: HomeTab.dashboard,
-              onCalendarTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const CalendarScreen()));
-              },
-              onWalletsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const WalletsScreen()));
-              },
-              onSettingsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const SettingsScreen()));
-              },
-              onAiTap: () {
-                Navigator.of(
-                  context,
-                ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
-              },
-            ),
-          ),
         ],
       ),
     );

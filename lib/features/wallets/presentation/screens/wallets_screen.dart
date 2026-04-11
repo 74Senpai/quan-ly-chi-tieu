@@ -193,34 +193,6 @@ class _WalletsScreenState extends State<WalletsScreen> {
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: HomeBottomNavigation(
-              activeTab: HomeTab.wallets,
-              onDashboardTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const DashboardScreen()));
-              },
-              onCalendarTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const CalendarScreen()));
-              },
-              onAiTap: () {
-                Navigator.of(
-                  context,
-                ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
-              },
-              onSettingsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const SettingsScreen()));
-              },
-            ),
-          ),
         ],
       ),
     );

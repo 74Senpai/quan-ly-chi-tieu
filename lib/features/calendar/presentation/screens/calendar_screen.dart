@@ -126,34 +126,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: HomeBottomNavigation(
-              activeTab: HomeTab.calendar,
-              onDashboardTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const DashboardScreen()));
-              },
-              onWalletsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const WalletsScreen()));
-              },
-              onSettingsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const SettingsScreen()));
-              },
-              onAiTap: () {
-                Navigator.of(
-                  context,
-                ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
-              },
-            ),
-          ),
         ],
       ),
     );

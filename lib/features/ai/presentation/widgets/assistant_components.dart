@@ -19,6 +19,7 @@ class AssistantShell extends StatelessWidget {
     this.onWalletsTap,
     this.onSettingsTap,
     this.onNotificationTap,
+    this.showBottomBar = true,
   });
 
   final String title;
@@ -30,6 +31,7 @@ class AssistantShell extends StatelessWidget {
   final VoidCallback? onWalletsTap;
   final VoidCallback? onSettingsTap;
   final VoidCallback? onNotificationTap;
+  final bool showBottomBar;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,10 @@ class AssistantShell extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                AssistantHeader(title: title, onNotificationTap: onNotificationTap),
+                AssistantHeader(
+                  title: title,
+                  onNotificationTap: onNotificationTap,
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 220),
@@ -59,19 +64,20 @@ class AssistantShell extends StatelessWidget {
             bottom: 112,
             child: InputBar(onMicTap: onMicTap, onCameraTap: onCameraTap),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: HomeBottomNavigation(
-              activeTab: HomeTab.ai,
-              onDashboardTap: onDashboardTap,
-              onCalendarTap: onCalendarTap,
-              onAiTap: () {},
-              onWalletsTap: onWalletsTap,
-              onSettingsTap: onSettingsTap,
+          if (showBottomBar)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: HomeBottomNavigation(
+                activeTab: HomeTab.ai,
+                onDashboardTap: onDashboardTap,
+                onCalendarTap: onCalendarTap,
+                onAiTap: () {},
+                onWalletsTap: onWalletsTap,
+                onSettingsTap: onSettingsTap,
+              ),
             ),
-          ),
         ],
       ),
     );
