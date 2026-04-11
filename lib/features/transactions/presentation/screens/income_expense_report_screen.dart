@@ -51,7 +51,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                                 iconBackground: Color(0xFFCFEFE6),
                                 iconForeground: Color(0xFF006D4A),
                                 label: 'TỔNG THU',
-                                value: '+890.000',
+                                value: '+36.000.000',
                                 valueColor: Color(0xFF006D4A),
                               ),
                             ),
@@ -62,7 +62,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                                 iconBackground: Color(0xFFFCE2E1),
                                 iconForeground: Color(0xFF9F403D),
                                 label: 'TỔNG CHI',
-                                value: '-395.000',
+                                value: '-12.000.000',
                                 valueColor: Color(0xFF9F403D),
                               ),
                             ),
@@ -80,7 +80,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                               );
                           },
                         ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 32),
                         _SectionHeader(
                           title: 'Giao dịch gần đây',
                           actionLabel: 'Xem tất cả',
@@ -161,46 +161,37 @@ class _PeriodTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF2F3FF),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _PeriodTab(
-                label: 'Tuần',
-                selected: period == ReportPeriod.week,
-                onTap: () => onChanged(ReportPeriod.week),
-              ),
-            ),
-            Expanded(
-              child: _PeriodTab(
-                label: 'Tháng',
-                selected: period == ReportPeriod.month,
-                onTap: () => onChanged(ReportPeriod.month),
-              ),
-            ),
-            Expanded(
-              child: _PeriodTab(
-                label: 'Năm',
-                selected: period == ReportPeriod.year,
-                onTap: () => onChanged(ReportPeriod.year),
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5FE),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          _TabItem(
+            label: 'Tuần',
+            selected: period == ReportPeriod.week,
+            onTap: () => onChanged(ReportPeriod.week),
+          ),
+          _TabItem(
+            label: 'Tháng',
+            selected: period == ReportPeriod.month,
+            onTap: () => onChanged(ReportPeriod.month),
+          ),
+          _TabItem(
+            label: 'Năm',
+            selected: period == ReportPeriod.year,
+            onTap: () => onChanged(ReportPeriod.year),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _PeriodTab extends StatelessWidget {
-  const _PeriodTab({
+class _TabItem extends StatelessWidget {
+  const _TabItem({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -212,39 +203,35 @@ class _PeriodTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = Center(
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: selected ? const Color(0xFF0053DB) : const Color(0xFF445D99),
-          fontSize: 16,
-          fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-        ),
-      ),
-    );
-    if (!selected) {
-      return InkWell(
-        borderRadius: BorderRadius.circular(12),
+    return Expanded(
+      child: GestureDetector(
         onTap: onTap,
-        child: child,
-      );
-    }
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: const Color(0x12000000),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
-        ],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: child,
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.manrope(
+                color: selected ? const Color(0xFF0053DB) : const Color(0xFF6C82B3),
+                fontSize: 15,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -262,11 +249,11 @@ class _TrendCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(25, 26, 25, 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0x1A98B1F2)),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: const Color(0xFFEAEDFF)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x05000000),
+            color: Color(0x0A000000),
             blurRadius: 40,
             offset: Offset(0, 20),
           ),
@@ -622,42 +609,70 @@ class _CalendarGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cellHeight = compact ? 44.0 : 56.0;
+    final cellHeight = compact ? 52.0 : 84.0;
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFF),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0x1A98B1F2)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: const Color(0xFFEAEDFF)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          Row(
-            children: [
-              for (final label in header)
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF6C82B3),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              children: [
+                for (final label in header)
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        label,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF6C82B3),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          for (final row in rows) ...[
-            SizedBox(
+          for (var i = 0; i < rows.length; i++) ...[
+            Container(
               height: cellHeight,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: const Color(0xFFEAEDFF)),
+                ),
+              ),
               child: Row(
                 children: [
-                  for (final cell in row)
+                  for (var j = 0; j < rows[i].length; j++)
                     Expanded(
-                      child: _CalendarCell(cell: cell, compact: compact),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: j < rows[i].length - 1
+                                ? const BorderSide(color: Color(0xFFEAEDFF))
+                                : BorderSide.none,
+                          ),
+                        ),
+                        child: _CalendarCell(
+                          cell: rows[i][j],
+                          compact: compact,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -677,6 +692,8 @@ class _Cell {
     this.selected = false,
     this.muted = false,
     this.marker = _Marker.none,
+    this.isToday = false,
+    this.isCurrentMonth = true,
   });
 
   final String day;
@@ -685,6 +702,8 @@ class _Cell {
   final bool selected;
   final bool muted;
   final _Marker marker;
+  final bool isToday;
+  final bool isCurrentMonth;
 }
 
 class _CalendarCell extends StatelessWidget {
@@ -696,80 +715,75 @@ class _CalendarCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEmpty = cell.day.isEmpty;
-    final textColor = cell.selected
-        ? Colors.white
-        : cell.muted
-        ? const Color(0xFFB6C2E3)
-        : const Color(0xFF113069);
-    final borderColor = cell.selected
-        ? const Color(0xFF0053DB)
-        : const Color(0x1A98B1F2);
+    final active = cell.selected;
 
-    return Padding(
-      padding: const EdgeInsets.all(4),
+    return InkWell(
+      onTap: () {},
       child: Container(
-        decoration: BoxDecoration(
-          color: cell.selected ? const Color(0xFF0053DB) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: borderColor),
-        ),
+        color: active ? const Color(0xFF0053DB) : Colors.transparent,
         child: isEmpty
             ? const SizedBox.expand()
             : Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: compact ? 6 : 5,
-                ),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            cell.day,
-                            style: GoogleFonts.inter(
-                              color: textColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                        _DayNumber(
+                          day: cell.day,
+                          isToday: cell.isToday,
+                          isCurrentMonth: cell.isCurrentMonth,
+                          active: active,
                         ),
+                        const Spacer(),
                         if (cell.marker != _Marker.none)
                           Container(
-                            width: 5,
-                            height: 5,
+                            width: 6,
+                            height: 6,
                             decoration: BoxDecoration(
                               color: cell.marker == _Marker.green
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
+                                  ? const Color(0xFF006D4A)
+                                  : const Color(0xFF9F403D),
                               shape: BoxShape.circle,
                             ),
                           ),
                       ],
                     ),
                     if (!compact) ...[
-                      const Spacer(),
+                      const SizedBox(height: 2),
                       if (cell.income != null)
-                        Text(
-                          cell.income!,
-                          style: GoogleFonts.inter(
-                            color: cell.selected
-                                ? const Color(0xFFDFF7EE)
-                                : const Color(0xFF006D4A),
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              cell.income!,
+                              maxLines: 1,
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFF006D4A),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
                           ),
                         ),
                       if (cell.expense != null)
-                        Text(
-                          cell.expense!,
-                          style: GoogleFonts.inter(
-                            color: cell.selected
-                                ? const Color(0xFFFCE2E1)
-                                : const Color(0xFF9F403D),
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              cell.expense!,
+                              maxLines: 1,
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFF9F403D),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
                           ),
                         ),
                     ],
@@ -801,11 +815,11 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3FF),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0x1A98B1F2)),
+        color: const Color(0xFFF1F5FE),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0x3398B1F2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,13 +829,13 @@ class _SummaryCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: iconBackground,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(22),
             ),
-            child: Icon(icon, color: iconForeground),
+            child: Icon(icon, color: iconForeground, size: 20),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
-            label,
+            label.toUpperCase(),
             style: GoogleFonts.inter(
               color: const Color(0xFF445D99),
               fontSize: 11,
@@ -830,13 +844,16 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            value,
-            style: GoogleFonts.manrope(
-              color: valueColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: GoogleFonts.manrope(
+                color: valueColor,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
         ],
@@ -854,11 +871,11 @@ class _DifferenceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3FF),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0x1A98B1F2)),
+        color: const Color(0xFFF1F5FE),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: const Color(0x6698B1F2)),
       ),
       child: Row(
         children: [
@@ -876,13 +893,16 @@ class _DifferenceCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '+495.000',
-                  style: GoogleFonts.manrope(
-                    color: const Color(0xFF0053DB),
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.9,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '+24.000.000',
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFF0053DB),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.9,
+                    ),
                   ),
                 ),
               ],
@@ -891,17 +911,18 @@ class _DifferenceCard extends StatelessWidget {
           const SizedBox(width: 12),
           InkWell(
             onTap: onCopy,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             child: Container(
-              width: 54,
-              height: 54,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFFE0EAFF),
-                borderRadius: BorderRadius.circular(16),
+                color: const Color(0xFFCFDDFE),
+                borderRadius: BorderRadius.circular(18),
               ),
               child: const Icon(
-                Icons.copy_all_outlined,
+                Icons.wallet_rounded,
                 color: Color(0xFF0053DB),
+                size: 26,
               ),
             ),
           ),
@@ -963,58 +984,30 @@ class _TransactionsCard extends StatelessWidget {
         amount: '-395.000',
         amountColor: Color(0xFF9F403D),
         icon: Icons.shopping_bag_outlined,
-        iconBackground: Color(0xFFFFE4E6),
+        iconBackground: Color(0xFFF1F5FE),
       ),
       (
-        title: 'Tiền làm thêm',
-        time: '01/03/2026 • 08:10',
-        amount: '+390.000',
+        title: 'Lương tháng 03',
+        time: '10/03/2026 • 08:15',
+        amount: '+35.000.000',
         amountColor: Color(0xFF006D4A),
-        icon: Icons.work_outline_rounded,
-        iconBackground: Color(0xFFCFEFE6),
-      ),
-      (
-        title: 'Cà phê',
-        time: '28/02/2026 • 09:15',
-        amount: '-55.000',
-        amountColor: Color(0xFF9F403D),
-        icon: Icons.local_cafe_outlined,
-        iconBackground: Color(0xFFFFEDD5),
+        icon: Icons.account_balance_wallet_outlined,
+        iconBackground: Color(0xFFE6F7F0),
       ),
     ];
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A113069),
-            blurRadius: 18,
-            offset: Offset(0, 10),
+    return Column(
+      children: [
+        for (final item in items)
+          _TransactionRow(
+            title: item.title,
+            time: item.time,
+            amount: item.amount,
+            amountColor: item.amountColor,
+            icon: item.icon,
+            iconBackground: item.iconBackground,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          for (var index = 0; index < items.length; index++) ...[
-            _TransactionRow(
-              title: items[index].title,
-              time: items[index].time,
-              amount: items[index].amount,
-              amountColor: items[index].amountColor,
-              icon: items[index].icon,
-              iconBackground: items[index].iconBackground,
-            ),
-            if (index != items.length - 1)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Divider(height: 1, color: Color(0x1498B1F2)),
-              ),
-          ],
-        ],
-      ),
+      ],
     );
   }
 }
@@ -1038,51 +1031,114 @@ class _TransactionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: iconBackground,
-            borderRadius: BorderRadius.circular(14),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
-          child: Icon(icon, color: const Color(0xFF113069)),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF113069),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: const Color(0xFF113069), size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                time,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF445D99),
-                  fontSize: 12,
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF6C82B3),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          amount,
-          style: GoogleFonts.inter(
-            color: amountColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
+          const SizedBox(width: 12),
+          Text(
+            amount,
+            style: GoogleFonts.manrope(
+              color: amountColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayNumber extends StatelessWidget {
+  const _DayNumber({
+    required this.day,
+    required this.isToday,
+    required this.isCurrentMonth,
+    required this.active,
+  });
+
+  final String day;
+  final bool isToday;
+  final bool isCurrentMonth;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    Color textColor;
+    if (active) {
+      textColor = Colors.white;
+    } else if (!isCurrentMonth) {
+      textColor = const Color(0xFFB6C2E3);
+    } else {
+      textColor = const Color(0xFF113069);
+    }
+
+    return Container(
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      decoration: isToday && !active
+          ? const BoxDecoration(
+              color: Color(0xFFEAEDFF),
+              shape: BoxShape.circle,
+            )
+          : null,
+      child: Text(
+        day,
+        style: GoogleFonts.inter(
+          color: textColor,
+          fontSize: 14,
+          fontWeight: (active || isToday) ? FontWeight.w800 : FontWeight.w600,
+          height: 1.1,
         ),
-      ],
+      ),
     );
   }
 }
