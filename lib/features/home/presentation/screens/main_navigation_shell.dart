@@ -8,14 +8,22 @@ import '../widgets/home_components.dart';
 import 'dashboard_screen.dart';
 
 class MainNavigationShell extends StatefulWidget {
-  const MainNavigationShell({super.key});
+  const MainNavigationShell({super.key, this.initialTab});
+
+  final HomeTab? initialTab;
 
   @override
   State<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
 class _MainNavigationShellState extends State<MainNavigationShell> {
-  HomeTab _activeTab = HomeTab.dashboard;
+  late HomeTab _activeTab;
+
+  @override
+  void initState() {
+    super.initState();
+    _activeTab = widget.initialTab ?? HomeTab.dashboard;
+  }
 
   final List<HomeTab> _tabs = [
     HomeTab.dashboard,

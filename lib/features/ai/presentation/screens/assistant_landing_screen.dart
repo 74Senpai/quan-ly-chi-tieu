@@ -7,10 +7,9 @@ import '../../data/ai_demo_data.dart';
 import '../widgets/assistant_components.dart';
 import 'camera_capture_demo_screen.dart';
 import 'voice_listening_screen.dart';
-import '../../../home/presentation/screens/dashboard_screen.dart';
-import '../../../calendar/presentation/screens/calendar_screen.dart';
-import '../../../wallets/presentation/screens/wallets_screen.dart';
-import '../../../settings/presentation/screens/settings_screen.dart';
+import '../widgets/assistant_components.dart';
+import '../../../home/presentation/screens/main_navigation_shell.dart';
+import '../../../home/presentation/widgets/home_components.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 class AssistantLandingScreen extends StatefulWidget {
@@ -80,23 +79,27 @@ class _AssistantLandingScreenState extends State<AssistantLandingScreen> {
         ).push(buildFadeSlideRoute(const CameraCaptureDemoScreen()));
       },
       onDashboardTap: () {
-        Navigator.of(context).pushReplacement(
-          buildFadeSlideRoute(const DashboardScreen()),
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.dashboard)),
+          (route) => false,
         );
       },
       onCalendarTap: () {
-        Navigator.of(context).pushReplacement(
-          buildFadeSlideRoute(const CalendarScreen()),
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.calendar)),
+          (route) => false,
         );
       },
       onWalletsTap: () {
-        Navigator.of(context).pushReplacement(
-          buildFadeSlideRoute(const WalletsScreen()),
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.wallets)),
+          (route) => false,
         );
       },
       onSettingsTap: () {
-        Navigator.of(context).pushReplacement(
-          buildFadeSlideRoute(const SettingsScreen()),
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.settings)),
+          (route) => false,
         );
       },
       onNotificationTap: () {

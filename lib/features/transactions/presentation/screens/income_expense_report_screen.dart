@@ -138,13 +138,16 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          Text(
-            'Báo cáo Thu Chi',
-            style: GoogleFonts.manrope(
-              color: const Color(0xFF0F172A),
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
+          Expanded(
+            child: Text(
+              'Báo cáo Thu Chi',
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF0F172A),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -292,7 +295,12 @@ class _TrendCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const _Legend(),
+              const Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _Legend(),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -724,11 +732,12 @@ class _CalendarCell extends StatelessWidget {
         child: isEmpty
             ? const SizedBox.expand()
             : Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(compact ? 4.0 : 8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Stack(
+                      alignment: Alignment.topRight,
                       children: [
                         _DayNumber(
                           day: cell.day,
@@ -736,16 +745,19 @@ class _CalendarCell extends StatelessWidget {
                           isCurrentMonth: cell.isCurrentMonth,
                           active: active,
                         ),
-                        const Spacer(),
                         if (cell.marker != _Marker.none)
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: cell.marker == _Marker.green
-                                  ? const Color(0xFF006D4A)
-                                  : const Color(0xFF9F403D),
-                              shape: BoxShape.circle,
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: cell.marker == _Marker.green
+                                    ? const Color(0xFF006D4A)
+                                    : const Color(0xFF9F403D),
+                                shape: BoxShape.circle,
+                              ),
                             ),
                           ),
                       ],
@@ -1082,12 +1094,16 @@ class _TransactionRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            amount,
-            style: GoogleFonts.manrope(
-              color: amountColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+          Flexible(
+            child: Text(
+              amount,
+              style: GoogleFonts.manrope(
+                color: amountColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
             ),
           ),
         ],
