@@ -94,7 +94,7 @@ class SettingsDemoData {
     'Sau 5 phút',
   ];
 
-  static const currencies = ['VND', 'USD', 'JPY'];
+  static const currencies = ['VND', 'USD', 'EUR', 'JPY'];
 
   static const decimalOptions = [0, 1, 2];
 

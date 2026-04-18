@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -66,6 +67,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _incomeCategories = result.incomeCategories;
       });
     }
+  }
+
+  void _openLocalBackup() {
+    Navigator.of(context).push(buildFadeSlideRoute(const LocalBackupScreen()));
   }
 
   void _showPlaceholderMessage(String label) {
@@ -168,9 +173,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               title: 'Sao lưu & Khôi phục',
                               subtitle: 'Google Drive, iCloud, xuất dữ liệu',
                               color: const Color(0xFFE8EDFF),
-                              onTap: () => _showPlaceholderMessage(
-                                'Sao lưu & Khôi phục',
-                              ),
+                              onTap: _openLocalBackup,
                             ),
                           ],
                         ),
@@ -786,14 +789,9 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   }
 
   Future<void> _pickCurrency() async {
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _ChoiceSheet<String>(
-        title: 'Chọn tiền tệ',
-        values: SettingsDemoData.currencies,
-        selected: _settings.currency,
-        labelBuilder: (value) => value,
+    final result = await Navigator.of(context).push<String>(
+      buildFadeSlideRoute(
+        CurrencySelectionScreen(selected: _settings.currency),
       ),
     );
     if (result != null) {
@@ -3216,6 +3214,690 @@ class _ChoiceSheet<T> extends StatelessWidget {
                 ),
                 if (index != values.length - 1) const SizedBox(height: 8),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LocalBackupScreen extends StatefulWidget {
+  const LocalBackupScreen({super.key});
+
+  @override
+  State<LocalBackupScreen> createState() => _LocalBackupScreenState();
+}
+
+class _LocalBackupScreenState extends State<LocalBackupScreen> {
+  String? _lastSavedName;
+
+  @override
+  Widget build(BuildContext context) {
+    final suggestedName = _buildSuggestedFileName(DateTime.now());
+    final history = _backupHistory(suggestedName);
+    return _SettingsScaffold(
+      title: 'Sao lưu Local',
+      onBack: () => Navigator.of(context).pop(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 132),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _PrivacyInfoCard(),
+            const SizedBox(height: 20),
+            _BackupActionCard(
+              suggestedName: suggestedName,
+              lastSavedName: _lastSavedName,
+              onCreate: () {
+                setState(() => _lastSavedName = suggestedName);
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    SnackBar(content: Text('Đã tạo backup: $suggestedName')),
+                  );
+              },
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Text(
+                  'Lịch sử sao lưu',
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '5 BẢN MỚI NHẤT',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF98B1F2),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            for (final item in history) ...[
+              _BackupHistoryTile(
+                name: item.name,
+                subtitle: item.subtitle,
+                onDelete: () {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text('Xóa ${item.name} (demo)')),
+                    );
+                },
+              ),
+              if (item != history.last) const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _buildSuggestedFileName(DateTime date) {
+    String two(int value) => value.toString().padLeft(2, '0');
+    final stamp = '${date.year}-${two(date.month)}-${two(date.day)}';
+    return 'backup_${stamp}_finances.json';
+  }
+
+  List<({String name, String subtitle})> _backupHistory(String suggestedName) {
+    return [
+      (name: suggestedName, subtitle: 'Hôm nay, 18:30 • 1.3 MB'),
+      (name: 'backup_2025-01-14.json', subtitle: 'Hôm qua, 18:30 • 1.2 MB'),
+      (name: 'backup_2025-01-12.json', subtitle: '12/01, 09:12 • 1.2 MB'),
+      (name: 'backup_2025-01-08.json', subtitle: '08/01, 22:01 • 1.1 MB'),
+      (name: 'backup_2025-01-01.json', subtitle: '01/01, 08:00 • 1.0 MB'),
+    ];
+  }
+}
+
+class _PrivacyInfoCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0x66DBE1FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x33DBE1FF)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0x33DBE1FF),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.info_outline_rounded,
+              color: Color(0xFF0053DB),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Quyền riêng tư dữ liệu',
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Các bản sao lưu bao gồm toàn bộ giao dịch, danh mục, cài đặt cá nhân và ngân sách của bạn. Dữ liệu được mã hóa và lưu trữ trực tiếp trên thiết bị của bạn.',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF445D99),
+                    fontSize: 14,
+                    height: 1.55,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BackupActionCard extends StatelessWidget {
+  const _BackupActionCard({
+    required this.suggestedName,
+    required this.lastSavedName,
+    required this.onCreate,
+  });
+
+  final String suggestedName;
+  final String? lastSavedName;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x1A98B1F2)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F113069),
+            blurRadius: 40,
+            offset: Offset(0, 20),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.cloud_download_outlined,
+            color: Color(0xFF0053DB),
+            size: 40,
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'TÊN FILE DỰ KIẾN',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF6079B7),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 180,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F3FF),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              _splitFileName(suggestedName),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.jetBrainsMono(
+                color: const Color(0xFF0053DB),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: onCreate,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0053DB),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.file_upload_outlined, size: 18),
+              label: Text(
+                'Tạo file backup',
+                style: GoogleFonts.manrope(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (lastSavedName != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0x336FFBBE),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF005E3F),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Đã lưu: ${lastSavedName!.replaceAll('_finances', '')}',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF005E3F),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 18),
+          Text(
+            'Tất cả các bản sao lưu được lưu cục bộ và\nkhông bao giờ rời khỏi thiết bị này.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF445D99),
+              fontSize: 14,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _splitFileName(String name) {
+    if (name.length <= 18) return name;
+    final splitAt = math.min(name.length, 14);
+    return '${name.substring(0, splitAt)}\n${name.substring(splitAt)}';
+  }
+}
+
+class _BackupHistoryTile extends StatelessWidget {
+  const _BackupHistoryTile({
+    required this.name,
+    required this.subtitle,
+    required this.onDelete,
+  });
+
+  final String name;
+  final String subtitle;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0x1A98B1F2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E7FF),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.description_outlined,
+              color: Color(0xFF0053DB),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF445D99),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline_rounded),
+            color: const Color(0xFF98B1F2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CurrencySelectionScreen extends StatefulWidget {
+  const CurrencySelectionScreen({super.key, required this.selected});
+
+  final String selected;
+
+  @override
+  State<CurrencySelectionScreen> createState() =>
+      _CurrencySelectionScreenState();
+}
+
+class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  late String _selected;
+  String _query = '';
+
+  static const _currencies = <({String code, String name, IconData icon})>[
+    (code: 'VND', name: 'Việt Nam Đồng', icon: Icons.currency_exchange_rounded),
+    (code: 'USD', name: 'Đô la Mỹ', icon: Icons.attach_money_rounded),
+    (code: 'EUR', name: 'Euro', icon: Icons.euro_rounded),
+    (code: 'JPY', name: 'Yên Nhật', icon: Icons.currency_yen_rounded),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.selected;
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _currencies
+        .where(
+          (item) =>
+              item.code.toLowerCase().contains(_query) ||
+              item.name.toLowerCase().contains(_query),
+        )
+        .toList();
+    return _SettingsScaffold(
+      title: 'Tiền Tệ',
+      onBack: () => Navigator.of(context).pop(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 132),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _CurrencyPreviewCard(code: _selected),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Text(
+                  'Tiền tệ chính',
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  _selected,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0053DB),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _CurrencySearchBar(controller: _searchController),
+            const SizedBox(height: 16),
+            for (final item in filtered) ...[
+              _CurrencyTile(
+                code: item.code,
+                name: item.name,
+                icon: item.icon,
+                selected: item.code == _selected,
+                onTap: () {
+                  setState(() => _selected = item.code);
+                  Navigator.of(context).pop(item.code);
+                },
+              ),
+              if (item != filtered.last) const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CurrencyPreviewCard extends StatelessWidget {
+  const _CurrencyPreviewCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = _formatPreview(code);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0053DB), Color(0xFF0048C1)],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x330053DB),
+            blurRadius: 28,
+            offset: Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'XEM TRƯỚC ĐỊNH DẠNG',
+            style: GoogleFonts.inter(
+              color: const Color(0xCCF8F7FF),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            preview,
+            style: GoogleFonts.manrope(
+              color: Colors.white,
+              fontSize: 48,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -2.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0x33FFFFFF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.autorenew_rounded,
+                  color: Colors.white,
+                  size: 14,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Đang cập nhật trực tiếp',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatPreview(String code) {
+    final value = 1234567;
+    final formatted = value.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]}.',
+    );
+    final symbol = switch (code) {
+      'VND' => '₫',
+      'USD' => '\$',
+      'EUR' => '€',
+      'JPY' => '¥',
+      _ => code,
+    };
+    return '$formatted $symbol';
+  }
+}
+
+class _CurrencySearchBar extends StatelessWidget {
+  const _CurrencySearchBar({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE2E7FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search_rounded, color: Color(0xFF98B1F2)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Tìm kiếm tiền tệ...',
+                border: InputBorder.none,
+                isDense: true,
+              ),
+              style: GoogleFonts.inter(
+                color: const Color(0xFF113069),
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrencyTile extends StatelessWidget {
+  const _CurrencyTile({
+    required this.code,
+    required this.name,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String code;
+  final String name;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0x80F2F3FF),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: selected
+                ? Border.all(color: const Color(0xFF0053DB), width: 2)
+                : null,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E7FF),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: const Color(0xFF0053DB)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      code,
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      name,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF445D99),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (selected)
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF0053DB),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
             ],
           ),
         ),
