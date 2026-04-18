@@ -307,31 +307,31 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: background,
       borderRadius: BorderRadius.circular(32),
-      child: Ink(
-        height: 160,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(32),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: foreground, size: 28),
-            const Spacer(),
-            Text(
-              title,
-              style: GoogleFonts.manrope(
-                color: foreground,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(32),
+        child: Container(
+          height: 160,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: foreground, size: 28),
+              const Spacer(),
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  color: foreground,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -80,7 +80,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               crossAxisCount: 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 169 / 94,
+              childAspectRatio: 169 / 105,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: const [

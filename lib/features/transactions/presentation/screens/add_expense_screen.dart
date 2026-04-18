@@ -75,7 +75,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 128),
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 160),
                     child: Column(
                       children: [
                         AmountDisplay(amount: _amount),

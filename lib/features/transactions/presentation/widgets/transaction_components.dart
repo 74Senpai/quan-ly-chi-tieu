@@ -257,6 +257,7 @@ class NumberPad extends StatelessWidget {
       crossAxisCount: 3,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
+      childAspectRatio: 1.6,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [

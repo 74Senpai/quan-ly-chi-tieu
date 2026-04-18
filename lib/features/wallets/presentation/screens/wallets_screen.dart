@@ -274,43 +274,46 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               left: 24,
               right: 24,
               top: 0,
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.of(context).pop(),
-                    borderRadius: BorderRadius.circular(12),
-                    child: const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Icon(
-                        Icons.arrow_back_rounded,
-                        color: Color(0xFF0053DB),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(12),
+                      child: const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF0053DB),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      wallet.name,
-                      style: GoogleFonts.manrope(
-                        color: const Color(0xFF113069),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        wallet.name,
+                        style: GoogleFonts.manrope(
+                          color: const Color(0xFF113069),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: _editWallet,
-                    child: Text(
-                      'Sửa ví',
-                      style: GoogleFonts.manrope(
-                        color: const Color(0xFF0053DB),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                    TextButton(
+                      onPressed: _editWallet,
+                      child: Text(
+                        'Sửa ví',
+                        style: GoogleFonts.manrope(
+                          color: const Color(0xFF0053DB),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -838,43 +841,49 @@ class _WalletEditorScreenState extends State<WalletEditorScreen> {
             left: 24,
             right: 24,
             top: 0,
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(12),
-                  child: const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Icon(
-                      Icons.arrow_back_rounded,
-                      color: Color(0xFF0053DB),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  isEditing ? 'Sửa Ví' : 'Thêm Ví',
-                  style: GoogleFonts.manrope(
-                    color: const Color(0xFF113069),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Spacer(),
-                if (isEditing)
-                  TextButton(
-                    onPressed: _confirmDelete,
-                    child: Text(
-                      'Xóa ví',
-                      style: GoogleFonts.manrope(
-                        color: const Color(0xFF0053DB),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(12),
+                      child: const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF0053DB),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                    const SizedBox(width: 16),
+                    Text(
+                      isEditing ? 'Sửa Ví' : 'Thêm Ví',
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (isEditing)
+                      TextButton(
+                        onPressed: _confirmDelete,
+                        child: Text(
+                          'Xóa ví',
+                          style: GoogleFonts.manrope(
+                            color: const Color(0xFF0053DB),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

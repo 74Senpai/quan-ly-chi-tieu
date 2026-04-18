@@ -9,6 +9,10 @@ import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
 import '../../../wallets/presentation/screens/wallets_screen.dart';
 import '../../data/calendar_demo_data.dart';
+import 'amount_filter_screen.dart';
+import 'category_filter_screen.dart';
+import 'source_filter_screen.dart';
+import 'time_range_filter_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -20,6 +24,13 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   int _monthIndex = 1;
   bool _gridMode = true;
+  bool _isFilterApplied = false;
+
+  // Filter values
+  String _selectedMonthName = 'Nov 2026';
+  List<String> _selectedCategories = ['Ăn Uống'];
+  String _selectedAmountRange = '>500k';
+  List<String> _selectedSources = [];
 
   CalendarMonthData get _month => CalendarDemoData.months[_monthIndex];
 
@@ -56,6 +67,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
+  Future<void> _showFilterSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _FilterBottomSheet(
+        categoryCount: _selectedCategories.length,
+        hasTimeFilter: _selectedMonthName.isNotEmpty,
+        hasAmountFilter: _selectedAmountRange.isNotEmpty,
+        hasSourceFilter: _selectedSources.isNotEmpty,
+        selectedCategories: _selectedCategories,
+        selectedAmount: _selectedAmountRange,
+        selectedSources: _selectedSources,
+        selectedMonth: _selectedMonthName,
+        onUpdate: (cats, amt, sources, month) {
+          setState(() {
+            if (cats != null) _selectedCategories = cats;
+            if (amt != null) _selectedAmountRange = amt;
+            if (sources != null) _selectedSources = sources;
+            if (month != null) _selectedMonthName = month;
+          });
+        },
+        onApply: () => setState(() => _isFilterApplied = true),
+      ),
+    );
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _isFilterApplied = false;
+      _selectedCategories = [];
+      _selectedAmountRange = '';
+      _selectedSources = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,43 +112,85 @@ class _CalendarScreenState extends State<CalendarScreen> {
           SafeArea(
             child: Column(
               children: [
-                const TopBrandBar(userName: 'Trang'),
+                if (!_isFilterApplied)
+                  const TopBrandBar(userName: 'Trang')
+                else
+                  _AppliedFilterHeader(
+                    onBack: _clearFilters,
+                    onFilterTap: _showFilterSheet,
+                  ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 132),
+                    padding: EdgeInsets.fromLTRB(_isFilterApplied ? 0 : 16, 16, _isFilterApplied ? 0 : 16, 132),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _CalendarControls(
-                          label: _month.label,
-                          gridMode: _gridMode,
-                          onPrevious: () => _changeMonth(-1),
-                          onNext: () => _changeMonth(1),
-                          onGridTap: () => setState(() => _gridMode = true),
-                          onListTap: () => setState(() => _gridMode = false),
-                        ),
-                        const SizedBox(height: 14),
-                        const _InteractionTip(),
-                        const SizedBox(height: 16),
-                        if (_gridMode)
-                          _CalendarGrid(
-                            month: _month,
-                            onTapDay: _showDaySheet,
-                            onLongPressDay: _openAddExpense,
-                          )
-                        else
-                          _MonthListView(
-                            month: _month,
-                            onAddTap: _openAddExpense,
-                            onDayTap: _showDaySheet,
+                        if (!_isFilterApplied) ...[
+                          _CalendarControls(
+                            label: _month.label,
+                            gridMode: _gridMode,
+                            onPrevious: () => _changeMonth(-1),
+                            onNext: () => _changeMonth(1),
+                            onGridTap: () => setState(() => _gridMode = true),
+                            onListTap: () => setState(() => _gridMode = false),
+                            onFilterTap: _showFilterSheet,
                           ),
-                        const SizedBox(height: 16),
-                        _SummaryRow(month: _month),
-                        const SizedBox(height: 20),
-                        _MonthTransactionsSection(
-                          transactions: _month.monthTransactions,
-                          onAddTap: _openAddExpense,
-                        ),
+                          const SizedBox(height: 14),
+                          const _InteractionTip(),
+                          const SizedBox(height: 16),
+                          if (_gridMode)
+                            _CalendarGrid(
+                              month: _month,
+                              onTapDay: _showDaySheet,
+                              onLongPressDay: _openAddExpense,
+                            )
+                          else
+                            _MonthListView(
+                              month: _month,
+                              onAddTap: _openAddExpense,
+                              onDayTap: _showDaySheet,
+                            ),
+                          const SizedBox(height: 16),
+                          _SummaryRow(month: _month),
+                          const SizedBox(height: 20),
+                          _MonthTransactionsSection(
+                            transactions: _month.monthTransactions,
+                            onAddTap: _openAddExpense,
+                          ),
+                        ] else ...[
+                          _AppliedFilterContent(
+                            month: _selectedMonthName,
+                            categories: _selectedCategories,
+                            amount: _selectedAmountRange,
+                            total: '-812.000đ',
+                            count: 3,
+                          ),
+                          const SizedBox(height: 20),
+                          _MonthTransactionsSection(
+                            transactions: _month.monthTransactions.take(3).toList(),
+                            onAddTap: _openAddExpense,
+                          ),
+                          const SizedBox(height: 32),
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: _clearFilters,
+                              icon: const Icon(Icons.filter_list_off_rounded, color: Color(0xFF0053DB)),
+                              label: Text(
+                                'Clear Filters',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF0053DB),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                backgroundColor: const Color(0xFFF2F3FF),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -132,6 +221,165 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 }
 
+class _AppliedFilterHeader extends StatelessWidget {
+  const _AppliedFilterHeader({required this.onBack, required this.onFilterTap});
+
+  final VoidCallback onBack;
+  final VoidCallback onFilterTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF113069)),
+            onPressed: onBack,
+          ),
+          Text(
+            'Lịch sử giao dịch',
+            style: GoogleFonts.manrope(
+              color: const Color(0xFF113069),
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.tune_rounded, color: Color(0xFF0053DB)),
+            onPressed: onFilterTap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppliedFilterContent extends StatelessWidget {
+  const _AppliedFilterContent({
+    required this.month,
+    required this.categories,
+    required this.amount,
+    required this.total,
+    required this.count,
+  });
+
+  final String month;
+  final List<String> categories;
+  final String amount;
+  final String total;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _FilterChip(icon: Icons.calendar_today_rounded, label: month),
+                const SizedBox(width: 8),
+                for (var cat in categories) ...[
+                  _FilterChip(icon: Icons.restaurant_rounded, label: cat),
+                  const SizedBox(width: 8),
+                ],
+                if (amount.isNotEmpty) _FilterChip(icon: Icons.payments_outlined, label: amount),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F3FF),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tổng giao dịch',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF445D99),
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        total,
+                        style: GoogleFonts.manrope(
+                          color: const Color(0xFF113069),
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  'Tìm thấy $count giao dịch',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF445D99),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF113069).withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFF0053DB)),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF0053DB),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CalendarControls extends StatelessWidget {
   const _CalendarControls({
     required this.label,
@@ -140,6 +388,7 @@ class _CalendarControls extends StatelessWidget {
     required this.onNext,
     required this.onGridTap,
     required this.onListTap,
+    required this.onFilterTap,
   });
 
   final String label;
@@ -148,28 +397,42 @@ class _CalendarControls extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onGridTap;
   final VoidCallback onListTap;
+  final VoidCallback onFilterTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         _MonthButton(icon: Icons.chevron_left_rounded, onTap: onPrevious),
-        const SizedBox(width: 14),
+        const SizedBox(width: 8),
         Text(
           label,
           style: GoogleFonts.manrope(
             color: const Color(0xFF0053DB),
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
-            letterSpacing: -0.6,
+            letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 8),
         _MonthButton(icon: Icons.chevron_right_rounded, onTap: onNext),
         const Spacer(),
         _ModeChip(label: 'Lưới', selected: gridMode, onTap: onGridTap),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
         _ModeChip(label: 'Danh sách', selected: !gridMode, onTap: onListTap),
+        const SizedBox(width: 6),
+        InkWell(
+          onTap: onFilterTap,
+          borderRadius: BorderRadius.circular(8),
+          child: const Padding(
+            padding: EdgeInsets.all(4),
+            child: Icon(
+              Icons.filter_list_rounded,
+              color: Color(0xFF0053DB),
+              size: 24,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -185,15 +448,15 @@ class _MonthButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: Ink(
-        width: 32,
-        height: 32,
+        width: 30,
+        height: 30,
         decoration: BoxDecoration(
           color: const Color(0xFFF2F3FF),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: const Color(0xFF7789BE), size: 18),
+        child: Icon(icon, color: const Color(0xFF7789BE), size: 16),
       ),
     );
   }
@@ -216,7 +479,7 @@ class _ModeChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: selected ? const Color(0x1A0053DB) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -225,7 +488,7 @@ class _ModeChip extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             color: selected ? const Color(0xFF0053DB) : const Color(0xFF445D99),
-            fontSize: 12,
+            fontSize: 11,
           ),
         ),
       ),
@@ -965,6 +1228,221 @@ class _SheetCloseButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Icon(Icons.close_rounded, color: Color(0xFF113069)),
+      ),
+    );
+  }
+}
+
+class _FilterBottomSheet extends StatelessWidget {
+  const _FilterBottomSheet({
+    this.hasTimeFilter = false,
+    this.categoryCount = 0,
+    this.hasAmountFilter = false,
+    this.hasSourceFilter = false,
+    required this.onApply,
+    required this.onUpdate,
+    this.selectedCategories = const [],
+    this.selectedAmount = '',
+    this.selectedSources = const [],
+    this.selectedMonth = '',
+  });
+
+  final bool hasTimeFilter;
+  final int categoryCount;
+  final bool hasAmountFilter;
+  final bool hasSourceFilter;
+  final VoidCallback onApply;
+  final Function(List<String>?, String?, List<String>?, String?) onUpdate;
+  final List<String> selectedCategories;
+  final String selectedAmount;
+  final List<String> selectedSources;
+  final String selectedMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SheetFrame(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Bộ lọc',
+                style: GoogleFonts.manrope(
+                  color: const Color(0xFF113069),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  onUpdate([], '', [], '');
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Đặt lại',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0053DB),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _FilterItem(
+            icon: Icons.calendar_today_rounded,
+            title: 'Khoảng thời gian',
+            subtitle: selectedMonth.isNotEmpty ? selectedMonth : 'Tháng này, Năm nay...',
+            selected: selectedMonth.isNotEmpty,
+            onTap: () async {
+              final result = await Navigator.of(context).push<String>(
+                MaterialPageRoute(builder: (_) => const TimeRangeFilterScreen()),
+              );
+              if (result != null) onUpdate(null, null, null, result);
+            },
+          ),
+          const SizedBox(height: 12),
+          _FilterItem(
+            icon: Icons.widgets_outlined,
+            title: 'Danh mục',
+            subtitle: selectedCategories.isNotEmpty ? '${selectedCategories.length} danh mục đã chọn' : 'Ăn uống, Mua sắm, Nhà cửa...',
+            selected: selectedCategories.isNotEmpty,
+            onTap: () async {
+              final result = await Navigator.of(context).push<List<String>>(
+                MaterialPageRoute(builder: (_) => CategoryFilterScreen(initialSelected: selectedCategories)),
+              );
+              if (result != null) onUpdate(result, null, null, null);
+            },
+          ),
+          const SizedBox(height: 12),
+          _FilterItem(
+            icon: Icons.payments_outlined,
+            title: 'Số tiền',
+            subtitle: selectedAmount.isNotEmpty ? selectedAmount : 'Dưới 500k, 500k - 2Tr...',
+            selected: selectedAmount.isNotEmpty,
+            onTap: () async {
+              final result = await Navigator.of(context).push<String>(
+                MaterialPageRoute(builder: (_) => const AmountFilterScreen()),
+              );
+              if (result != null) onUpdate(null, result, null, null);
+            },
+          ),
+          const SizedBox(height: 12),
+          _FilterItem(
+            icon: Icons.account_balance_wallet_outlined,
+            title: 'Nguồn tiền',
+            subtitle: selectedSources.isNotEmpty ? '${selectedSources.length} nguồn đã chọn' : 'Ví chính, Thẻ tín dụng...',
+            selected: selectedSources.isNotEmpty,
+            onTap: () async {
+              final result = await Navigator.of(context).push<List<String>>(
+                MaterialPageRoute(builder: (_) => const SourceFilterScreen()),
+              );
+              if (result != null) onUpdate(null, null, result, null);
+            },
+          ),
+          const SizedBox(height: 32),
+          PrimaryBlueButton(
+            label: 'Áp dụng',
+            onTap: () {
+              onApply();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterItem extends StatelessWidget {
+  const _FilterItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F3FF),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF0053DB), size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFF113069),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? const Color(0xFF0053DB) : const Color(0xFFD9E2FF),
+                  width: 2,
+                ),
+              ),
+              child: selected
+                  ? Center(
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0053DB),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }

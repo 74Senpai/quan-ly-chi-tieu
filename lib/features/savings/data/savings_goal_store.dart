@@ -34,6 +34,8 @@ class SavingsGoal {
     this.themeStart = const Color(0xFF0053DB),
     this.themeEnd = const Color(0xFF0048C1),
     this.transactions = const [],
+    this.isDeleted = false,
+    this.deletionReason,
   });
 
   final String id;
@@ -46,6 +48,8 @@ class SavingsGoal {
   final Color themeStart;
   final Color themeEnd;
   final List<SavingsTransaction> transactions;
+  final bool isDeleted;
+  final String? deletionReason;
 
   double get progress =>
       targetAmount <= 0 ? 0 : (currentAmount / targetAmount).clamp(0.0, 1.0);
@@ -62,6 +66,8 @@ class SavingsGoal {
     Color? themeStart,
     Color? themeEnd,
     List<SavingsTransaction>? transactions,
+    bool? isDeleted,
+    String? deletionReason,
   }) {
     return SavingsGoal(
       id: id,
@@ -74,6 +80,8 @@ class SavingsGoal {
       themeStart: themeStart ?? this.themeStart,
       themeEnd: themeEnd ?? this.themeEnd,
       transactions: transactions ?? this.transactions,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletionReason: deletionReason ?? this.deletionReason,
     );
   }
 }
@@ -83,14 +91,17 @@ class SavingsGoalStore extends ValueNotifier<List<SavingsGoal>> {
 
   static final SavingsGoalStore instance = SavingsGoalStore._();
 
-  int get totalSaved => value.fold<int>(0, (sum, goal) => sum + goal.currentAmount);
-  int get goalsCount => value.length;
+  int get totalSaved => value.where((g) => !g.isDeleted).fold<int>(0, (sum, goal) => sum + goal.currentAmount);
+  int get goalsCount => value.where((g) => !g.isDeleted).length;
 
   double get overallProgress {
-    final totalTarget = value.fold<int>(0, (sum, goal) => sum + goal.targetAmount);
+    final totalTarget = value.where((g) => !g.isDeleted).fold<int>(0, (sum, goal) => sum + goal.targetAmount);
     if (totalTarget <= 0) return 0;
     return (totalSaved / totalTarget).clamp(0.0, 1.0);
   }
+
+  List<SavingsGoal> get activeGoals => value.where((g) => !g.isDeleted).toList();
+  List<SavingsGoal> get deletedGoals => value.where((g) => g.isDeleted).toList();
 
   SavingsGoal? byId(String id) => value.where((g) => g.id == id).firstOrNull;
 
@@ -104,8 +115,24 @@ class SavingsGoalStore extends ValueNotifier<List<SavingsGoal>> {
     ];
   }
 
-  void deleteGoal(String id) {
-    value = value.where((g) => g.id != id).toList(growable: false);
+  void deleteGoal(String id, {String? reason}) {
+    final goal = byId(id);
+    if (goal != null) {
+      updateGoal(goal.copyWith(
+        isDeleted: true,
+        deletionReason: reason,
+      ));
+    }
+  }
+
+  void reopenGoal(String id) {
+    final goal = byId(id);
+    if (goal != null) {
+      updateGoal(goal.copyWith(
+        isDeleted: false,
+        deletionReason: null,
+      ));
+    }
   }
 
   void deposit({

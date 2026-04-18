@@ -52,11 +52,9 @@ class SavingsGoalDetailScreen extends StatelessWidget {
                 return Column(
                   children: [
                     _TopBar(
-                      title: 'Chi tiết mục tiêu',
+                      title: goal.isDeleted ? 'Mục tiêu đã xóa' : 'Chi tiết mục tiêu',
                       onBack: () => Navigator.of(context).pop(),
-                      onMore: () {
-                        _showMore(context, goal);
-                      },
+                      onMore: goal.isDeleted ? null : () => _showMoreActions(context, goal),
                     ),
                     Expanded(
                       child: SingleChildScrollView(
@@ -64,67 +62,101 @@ class SavingsGoalDetailScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (goal.isDeleted) _DeletedHeader(reason: goal.deletionReason),
                             _SummaryCard(goal: goal),
-                            const SizedBox(height: 14),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _MiniStat(
-                                    label: 'TỔNG ĐÃ\nNẠP',
-                                    value: formatVnd(deposits),
+                            if (!goal.isDeleted) ...[
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _MiniStat(
+                                      label: 'TỔNG ĐÃ\nNẠP',
+                                      value: formatVnd(deposits),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _MiniStat(
-                                    label: 'SỐ LẦN\nNẠP',
-                                    value: times.toString(),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _MiniStat(
+                                      label: 'SỐ LẦN\nNẠP',
+                                      value: times.toString(),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _MiniStat(
-                                    label: 'NẠP TB/\nTHÁNG',
-                                    value: formatVnd(goal.monthlySaving),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _MiniStat(
+                                      label: 'NẠP TB/\nTHÁNG',
+                                      value: formatVnd(goal.monthlySaving),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _ActionButton(
-                                    label: 'NẠP TIỀN',
-                                    primary: true,
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        buildFadeSlideRoute(
-                                          SavingsGoalDepositScreen(goalId: goal.id),
-                                        ),
-                                      );
-                                    },
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _ActionButton(
+                                      label: 'NẠP TIỀN',
+                                      primary: true,
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          buildFadeSlideRoute(
+                                            SavingsGoalDepositScreen(goalId: goal.id),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _ActionButton(
-                                    label: 'RÚT TIỀN',
-                                    primary: false,
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        buildFadeSlideRoute(
-                                          SavingsGoalWithdrawScreen(goalId: goal.id),
-                                        ),
-                                      );
-                                    },
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _ActionButton(
+                                      label: 'RÚT TIỀN',
+                                      primary: false,
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          buildFadeSlideRoute(
+                                            SavingsGoalWithdrawScreen(goalId: goal.id),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 18),
-                            _GrowthCard(goal: goal),
-                            const SizedBox(height: 18),
+                                ],
+                              ),
+                              const SizedBox(height: 18),
+                              _GrowthCard(goal: goal),
+                            ] else ...[
+                              const SizedBox(height: 18),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _ActionButton(
+                                      label: 'MỞ LẠI',
+                                      primary: true,
+                                      onTap: () {
+                                        SavingsGoalStore.instance.reopenGoal(goal.id);
+                                      },
+                                      color: Colors.black,
+                                      textColor: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _ActionButton(
+                                      label: 'RÚT TIỀN',
+                                      primary: false,
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          buildFadeSlideRoute(SavingsGoalWithdrawScreen(goalId: goal.id)),
+                                        );
+                                      },
+                                      color: Colors.white,
+                                      textColor: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            const SizedBox(height: 24),
                             Text(
                               'Chi tiết giao dịch',
                               style: GoogleFonts.manrope(
@@ -149,52 +181,242 @@ class SavingsGoalDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showMore(BuildContext context, SavingsGoal goal) {
-    showModalBottomSheet<void>(
+  void _showMoreActions(BuildContext context, SavingsGoal goal) {
+    showDialog<void>(
       context: context,
-      backgroundColor: const Color(0xFFFAF8FF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 48,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0x4D98B1F2),
-                  borderRadius: BorderRadius.circular(12),
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 40,
+                  offset: const Offset(0, 10),
                 ),
-              ),
-              const SizedBox(height: 18),
-              ListTile(
-                leading: const Icon(Icons.edit_rounded, color: Color(0xFF0053DB)),
-                title: const Text('Chỉnh sửa mục tiêu'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    buildFadeSlideRoute(SavingsGoalEditorScreen(goalId: goal.id)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFF9F403D)),
-                title: const Text('Xóa mục tiêu'),
-                onTap: () {
-                  SavingsGoalStore.instance.deleteGoal(goal.id);
-                  Navigator.of(context)
-                    ..pop()
-                    ..pop();
-                },
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Hành động',
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        buildFadeSlideRoute(SavingsGoalEditorScreen(goalId: goal.id)),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF0053DB),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: Text(
+                      'Sửa mục tiêu',
+                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showDeleteDialog(context, goal);
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF9E473E),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: Text(
+                      'Xóa mục tiêu',
+                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, SavingsGoal goal) {
+    final reasonController = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: SingleChildScrollView(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFEBEA),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.delete_outline_rounded, color: Color(0xFF9E473E), size: 32),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Xóa mục tiêu?',
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF113069),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Mục tiêu đã đạt ${(goal.progress * 100).toInt()}% bạn có chắc muốn xóa ?',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF445D99),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E2E2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TextField(
+                        controller: reasonController,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Lý do xóa mục tiêu',
+                          hintStyle: GoogleFonts.inter(
+                            color: const Color(0xFF7F7F7F),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: FilledButton(
+                        onPressed: () {
+                          SavingsGoalStore.instance.deleteGoal(
+                            goal.id,
+                            reason: reasonController.text.trim().isEmpty ? null : reasonController.text.trim(),
+                          );
+                          Navigator.of(context).pop();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF9E473E),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(
+                          'Xóa',
+                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Hủy',
+                        style: GoogleFonts.inter(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DeletedHeader extends StatelessWidget {
+  const _DeletedHeader({this.reason});
+
+  final String? reason;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF9E473E),
+        borderRadius: BorderRadius.circular(40),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'MỤC TIÊU ĐÃ ĐƯỢC XÓA',
+            style: GoogleFonts.manrope(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+          if (reason != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Lý do: $reason',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -270,14 +492,15 @@ class _SummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3FF),
-        borderRadius: BorderRadius.circular(24),
+        color: goal.isDeleted ? const Color(0xFFC4C4C4) : const Color(0xFFF2F3FF),
+        borderRadius: BorderRadius.circular(32),
       ),
       child: Row(
         children: [
           Container(
             width: 56,
             height: 56,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -299,7 +522,7 @@ class _SummaryCard extends StatelessWidget {
                 Text(
                   goal.name,
                   style: GoogleFonts.manrope(
-                    color: const Color(0xFF113069),
+                    color: goal.isDeleted ? const Color(0xFF7F7F7F) : const Color(0xFF113069),
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
@@ -309,9 +532,11 @@ class _SummaryCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '${formatVnd(goal.currentAmount)} / ${formatVnd(goal.targetAmount)}',
+                    goal.isDeleted
+                        ? '${formatVnd(goal.currentAmount)} / ${formatVnd(goal.targetAmount)}'
+                        : '${formatVnd(goal.currentAmount)} / ${formatVnd(goal.targetAmount)}',
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF0053DB),
+                      color: goal.isDeleted ? const Color(0xFF7F7F7F) : const Color(0xFF0053DB),
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -323,8 +548,10 @@ class _SummaryCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: goal.progress,
                     minHeight: 8,
-                    backgroundColor: const Color(0xFFE2E7FF),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0053DB)),
+                    backgroundColor: goal.isDeleted ? Colors.white : const Color(0xFFE2E7FF),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      goal.isDeleted ? const Color(0xFF7F7F7F) : const Color(0xFF0053DB),
+                    ),
                   ),
                 ),
               ],
@@ -393,11 +620,15 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.primary,
     required this.onTap,
+    this.color,
+    this.textColor,
   });
 
   final String label;
   final bool primary;
   final VoidCallback onTap;
+  final Color? color;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +638,7 @@ class _ActionButton extends StatelessWidget {
           ? FilledButton(
               onPressed: onTap,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF0053DB),
+                backgroundColor: color ?? const Color(0xFF0053DB),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -415,7 +646,7 @@ class _ActionButton extends StatelessWidget {
               child: Text(
                 label,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFFF8F7FF),
+                  color: textColor ?? const Color(0xFFF8F7FF),
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -425,15 +656,16 @@ class _ActionButton extends StatelessWidget {
           : FilledButton(
               onPressed: onTap,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFE2E7FF),
+                backgroundColor: color ?? const Color(0xFFE2E7FF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
+                  side: color == Colors.white ? const BorderSide(color: Color(0xFFE2E2E2)) : BorderSide.none,
                 ),
               ),
               child: Text(
                 label,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF113069),
+                  color: textColor ?? const Color(0xFF113069),
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,

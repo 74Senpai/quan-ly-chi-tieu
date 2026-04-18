@@ -43,6 +43,7 @@ class _SavingsGoalWithdrawScreenState extends State<SavingsGoalWithdrawScreen> {
     final walletBalance = 15000000;
     final afterWallet = walletBalance + _amount();
     final remainingGoal = (goal.currentAmount - _amount()).clamp(0, goal.currentAmount);
+    final isFullWithdraw = _amount() >= goal.currentAmount;
 
     return Scaffold(
       body: Stack(
@@ -65,7 +66,7 @@ class _SavingsGoalWithdrawScreenState extends State<SavingsGoalWithdrawScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 140),
                     child: Column(
                       children: [
-                        _WarningBanner(),
+                        _WarningBanner(isFullWithdraw: isFullWithdraw),
                         const SizedBox(height: 16),
                         _GoalProgressCard(goal: goal),
                         const SizedBox(height: 16),
@@ -136,15 +137,20 @@ class _SavingsGoalWithdrawScreenState extends State<SavingsGoalWithdrawScreen> {
             bottom: 0,
             child: _BottomBar(
               label: 'Xác nhận rút tiền',
+              isFullWithdraw: isFullWithdraw,
               onTap: () {
+                final amount = _amount();
                 SavingsGoalStore.instance.withdraw(
                   goalId: goal.id,
-                  amount: _amount(),
+                  amount: amount,
                   source: wallet,
                   note: _reasonController.text.trim().isEmpty
                       ? null
                       : _reasonController.text.trim(),
                 );
+                if (isFullWithdraw) {
+                  SavingsGoalStore.instance.deleteGoal(goal.id);
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -212,26 +218,64 @@ class _TopBar extends StatelessWidget {
 }
 
 class _WarningBanner extends StatelessWidget {
+  const _WarningBanner({required this.isFullWithdraw});
+
+  final bool isFullWithdraw;
+
   @override
   Widget build(BuildContext context) {
+    if (!isFullWithdraw) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF9EB),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 18),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Rút tiền sẽ làm chậm tiến độ mục tiêu',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF78350F),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF9EB),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFEADBDB),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 18),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF9E473E),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Rút tiền sẽ làm chậm tiến độ mục tiêu',
+              'Sau khi rút hết tiền, mục tiêu sẽ được xóa hoàn toàn',
               style: GoogleFonts.inter(
-                color: const Color(0xFF78350F),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                color: const Color(0xFF9E473E),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -333,10 +377,10 @@ class _AmountPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3FF),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFEADBDB),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         children: [
@@ -357,50 +401,57 @@ class _AmountPanel extends StatelessWidget {
               Text(
                 _pretty(amount),
                 style: GoogleFonts.manrope(
-                  color: const Color(0xFF113069),
+                  color: Colors.black,
                   fontSize: 48,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(width: 6),
-              Text(
-                'đ',
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF445D99),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'đ',
+                  style: GoogleFonts.inter(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 12),
+          Stack(
+            alignment: Alignment.center,
             children: [
               Text(
                 'Còn lại trong mục tiêu: ${formatVnd(remainingInGoal)}',
                 style: GoogleFonts.inter(
                   color: const Color(0xFF445D99),
-                  fontSize: 12,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 10),
-              TextButton(
-                onPressed: onAll,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  backgroundColor: const Color(0xFFE2E7FF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: onAll,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    backgroundColor: const Color(0xFF9E473E),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Rút toàn bộ',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF0053DB),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                  child: Text(
+                    'Rút toàn bộ',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -535,10 +586,11 @@ class _WithdrawImpactHint extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.label, required this.onTap});
+  const _BottomBar({required this.label, required this.onTap, required this.isFullWithdraw});
 
   final String label;
   final VoidCallback onTap;
+  final bool isFullWithdraw;
 
   @override
   Widget build(BuildContext context) {
@@ -565,18 +617,16 @@ class _BottomBar extends StatelessWidget {
         child: FilledButton(
           onPressed: onTap,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF0053DB),
+            backgroundColor: isFullWithdraw ? const Color(0xFF9E473E) : const Color(0xFF0053DB),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(isFullWithdraw ? 20 : 12),
             ),
-            elevation: 12,
-            shadowColor: const Color(0x400053DB),
           ),
           child: Text(
             label,
             style: GoogleFonts.manrope(
-              color: const Color(0xFFF8F7FF),
-              fontSize: 18,
+              color: Colors.white,
+              fontSize: isFullWithdraw ? 20 : 18,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -585,4 +635,3 @@ class _BottomBar extends StatelessWidget {
     );
   }
 }
-

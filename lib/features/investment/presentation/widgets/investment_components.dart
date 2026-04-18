@@ -225,46 +225,50 @@ class InvestmentSegmentTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final option in options) ...[
-          GestureDetector(
-            onTap: () => onChanged(option),
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? 12 : 16,
-                vertical: compact ? 4 : 8,
-              ),
-              decoration: BoxDecoration(
-                color: option == selected
-                    ? const Color(0xFF0053DB)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(compact ? 8 : 12),
-                boxShadow: option == selected
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x260053DB),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Text(
-                option,
-                style: GoogleFonts.inter(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          for (final option in options) ...[
+            GestureDetector(
+              onTap: () => onChanged(option),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 16,
+                  vertical: compact ? 4 : 8,
+                ),
+                decoration: BoxDecoration(
                   color: option == selected
-                      ? Colors.white
-                      : const Color(0xFF445D99),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
+                      ? const Color(0xFF0053DB)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(compact ? 8 : 12),
+                  boxShadow: option == selected
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x260053DB),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  option,
+                  style: GoogleFonts.inter(
+                    color: option == selected
+                        ? Colors.white
+                        : const Color(0xFF445D99),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -511,7 +515,7 @@ class InvestmentMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(21),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFF2F3FF),
         borderRadius: BorderRadius.circular(16),
