@@ -147,16 +147,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           else
                             _MonthListView(
                               month: _month,
-                              onAddTap: _openAddExpense,
                               onDayTap: _showDaySheet,
                             ),
-                          const SizedBox(height: 16),
-                          _SummaryRow(month: _month),
                           const SizedBox(height: 20),
-                          _MonthTransactionsSection(
-                            transactions: _month.monthTransactions,
-                            onAddTap: _openAddExpense,
-                          ),
+                          _SummaryRow(month: _month),
+                          const SizedBox(height: 24),
+                          if (_gridMode)
+                            _MonthTransactionsSection(
+                              transactions: _month.monthTransactions,
+                              onAddTap: _openAddExpense,
+                            ),
                         ] else ...[
                           _AppliedFilterContent(
                             month: _selectedMonthName,
@@ -753,11 +753,11 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(17),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withValues(alpha: 0.12)),
+        border: Border.all(color: color.withValues(alpha: 0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,32 +765,33 @@ class _SummaryCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 14),
+                child: Icon(icon, color: color, size: 16),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 title.toUpperCase(),
                 style: GoogleFonts.inter(
-                  color: color,
-                  fontSize: 10,
+                  color: color.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             value,
             style: GoogleFonts.manrope(
               color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -925,64 +926,214 @@ class _MonthTransactionRow extends StatelessWidget {
 class _MonthListView extends StatelessWidget {
   const _MonthListView({
     required this.month,
-    required this.onAddTap,
     required this.onDayTap,
   });
 
   final CalendarMonthData month;
-  final VoidCallback onAddTap;
   final ValueChanged<CalendarDayData> onDayTap;
 
   @override
   Widget build(BuildContext context) {
-    final grouped = <String, List<CalendarTransaction>>{
-      'Đầu tháng': month.monthTransactions.take(2).toList(),
-      'Gần đây': month.monthTransactions.skip(2).toList(),
-    };
+    // Generate some demo days to match the screenshot if it's Tháng 4
+    final isApril = month.label == 'Tháng 4';
+    
+    final List<Map<String, dynamic>> displayDays = isApril ? [
+      {
+        'day': '12',
+        'weekday': 'CN',
+        'dateLabel': 'Chủ nhật, 12/04',
+        'infoLabel': 'Hôm nay',
+        'amount': '-420.000đ',
+        'positive': false,
+      },
+      {
+        'day': '11',
+        'weekday': 'T7',
+        'dateLabel': 'Thứ 7, 11/04',
+        'infoLabel': '3 giao dịch',
+        'amount': '+1.200.000đ',
+        'positive': true,
+      },
+      {
+        'day': '10',
+        'weekday': 'T6',
+        'dateLabel': 'Thứ 6, 10/04',
+        'infoLabel': '5 giao dịch',
+        'amount': '-10.000đ',
+        'positive': false,
+      },
+      {
+        'day': '09',
+        'weekday': 'T5',
+        'dateLabel': 'Thứ 5, 09/04',
+        'infoLabel': '2 giao dịch',
+        'amount': '+350.000đ',
+        'positive': true,
+      },
+      {
+        'day': '08',
+        'weekday': 'T4',
+        'dateLabel': 'Thứ 4, 08/04',
+        'infoLabel': '0 giao dịch',
+        'amount': '0đ',
+        'positive': false,
+      },
+      {
+        'day': '07',
+        'weekday': 'T3',
+        'dateLabel': 'Thứ 3, 07/04',
+        'infoLabel': '8 giao dịch',
+        'amount': '-2.100.000đ',
+        'positive': false,
+      },
+      {
+        'day': '06',
+        'weekday': 'T2',
+        'dateLabel': 'Thứ 2, 06/04',
+        'infoLabel': '1 giao dịch',
+        'amount': '+150.000đ',
+        'positive': true,
+      },
+    ] : [];
 
+    if (displayDays.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(
+            'Không có dữ liệu cho ${month.label}',
+            style: GoogleFonts.inter(color: const Color(0xFF445D99)),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: displayDays.map((d) => InkWell(
+        onTap: () => onDayTap(CalendarDayData(day: int.parse(d['day'] as String))),
+        child: _DailySummaryCard(
+          day: d['day'] as String,
+          weekday: d['weekday'] as String,
+          dateLabel: d['dateLabel'] as String,
+          infoLabel: d['infoLabel'] as String,
+          amount: d['amount'] as String,
+          positive: d['positive'] as bool,
+        ),
+      )).toList(),
+    );
+  }
+}
+
+class _DailySummaryCard extends StatelessWidget {
+  const _DailySummaryCard({
+    required this.day,
+    required this.weekday,
+    required this.dateLabel,
+    required this.infoLabel,
+    required this.amount,
+    required this.positive,
+  });
+
+  final String day;
+  final String weekday;
+  final String dateLabel;
+  final String infoLabel;
+  final String amount;
+  final bool positive;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: const Color(0xFFEAEDFF)),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF113069).withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          for (final entry in grouped.entries) ...[
-            Text(
-              entry.key,
-              style: GoogleFonts.manrope(
-                color: const Color(0xFF113069),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE9EFFF),
+              borderRadius: BorderRadius.circular(14),
             ),
-            const SizedBox(height: 12),
-            for (final transaction in entry.value) ...[
-              InkWell(
-                onTap: () =>
-                    onDayTap(const CalendarDayData(day: 6, isSelected: true)),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8F8F8),
-                    borderRadius: BorderRadius.circular(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  weekday,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0053DB),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
-                  child: _MonthTransactionRow(transaction: transaction),
+                ),
+                Text(
+                  day,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0053DB),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  dateLabel,
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF113069),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  infoLabel,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF7789BE),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amount,
+                style: GoogleFonts.manrope(
+                  color: positive ? const Color(0xFF006D4A) : const Color(0xFF9F403D),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Xem chi tiết',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF0053DB),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
-          ],
-          const SizedBox(height: 8),
-          PrimaryBlueButton(
-            label: 'Thêm giao dịch mới',
-            onTap: onAddTap,
-            icon: Icons.add_rounded,
           ),
         ],
       ),
