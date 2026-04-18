@@ -10,6 +10,7 @@ import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
 import '../../../cashflow/presentation/screens/cashflow_overview_screen.dart';
 import '../../../investment/presentation/screens/investment_overview_screen.dart';
+import '../../../reconciliation/presentation/screens/reconciliation_overview_screen.dart';
 import '../../../savings/presentation/screens/savings_goals_screen.dart';
 import '../../../tax/presentation/screens/tax_overview_screen.dart';
 import '../../../debts/presentation/screens/debt_book_screen.dart';
@@ -38,14 +39,6 @@ class DashboardScreen extends StatelessWidget {
     Navigator.of(
       context,
     ).push(buildFadeSlideRoute(const BudgetOverviewScreen()));
-  }
-
-  void _showComingSoon(BuildContext context, String featureName) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('$featureName đang được hoàn thiện.')),
-      );
   }
 
   @override
@@ -196,7 +189,13 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icons.compare_arrows_rounded,
                               iconBackground: const Color(0xFFDFE8FF),
                               iconForeground: const Color(0xFF315AA9),
-                              onTap: () => _showComingSoon(context, 'Đối soát'),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const ReconciliationOverviewScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _FeatureMenuItem(
                               title: 'Thuế',
