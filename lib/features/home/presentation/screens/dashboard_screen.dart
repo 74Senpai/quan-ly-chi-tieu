@@ -10,6 +10,7 @@ import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
 import '../../../investment/presentation/screens/investment_overview_screen.dart';
 import '../../../savings/presentation/screens/savings_goals_screen.dart';
+import '../../../tax/presentation/screens/tax_overview_screen.dart';
 import '../../../debts/presentation/screens/debt_book_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
 import '../../../transactions/presentation/screens/income_expense_report_screen.dart';
@@ -197,7 +198,13 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icons.receipt_outlined,
                               iconBackground: const Color(0xFFE9E1FF),
                               iconForeground: const Color(0xFF6D4ACF),
-                              onTap: () => _showComingSoon(context, 'Thuế'),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const TaxOverviewScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _FeatureMenuItem(
                               title: 'Đầu tư',
