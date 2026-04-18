@@ -199,28 +199,32 @@ class _HeroSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                formatVnd(totalSaved).replaceAll('đ', ''),
-                style: GoogleFonts.manrope(
-                  color: const Color(0xFFF8F7FF),
-                  fontSize: 36,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.9,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatVnd(totalSaved).replaceAll('đ', ''),
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFFF8F7FF),
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.9,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'đ',
-                style: GoogleFonts.inter(
-                  color: const Color(0xE6F8F7FF),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(width: 8),
+                Text(
+                  'đ',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xE6F8F7FF),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -399,39 +403,57 @@ class _GoalCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE6FFEE),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                'ĐANG TIẾT KIỆM',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF006D4A),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE6FFEE),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  'ĐANG TIẾT KIỆM',
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF006D4A),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.8,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
-                            const Spacer(),
-                            Text(
-                              formatVnd(goal.currentAmount),
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF0053DB),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              ' / ${formatVnd(goal.targetAmount)}',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF445D99),
-                                fontSize: 12,
+                            const SizedBox(width: 8),
+                            Flexible(
+                              flex: 2,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      formatVnd(goal.currentAmount),
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFF0053DB),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    ' / ${formatVnd(goal.targetAmount)}',
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFF445D99),
+                                      fontSize: 12,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -454,16 +476,26 @@ class _GoalCard extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today_rounded, size: 14, color: Color(0xFF6C82B3)),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Dự kiến: ${formatGoalMonthYear(goal.targetDate ?? DateTime.now())}',
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFF445D99),
-                      fontSize: 12,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_rounded, size: 14, color: Color(0xFF6C82B3)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Dự kiến: ${formatGoalMonthYear(goal.targetDate ?? DateTime.now())}',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF445D99),
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     '${(goal.progress * 100).round()}%',
                     style: GoogleFonts.inter(
@@ -662,12 +694,16 @@ class _CompletedGoalsState extends State<_CompletedGoals> {
                               ),
                             ),
                           ),
-                          Text(
-                            formatVnd(goal.targetAmount),
-                            style: GoogleFonts.inter(
-                              color: const Color(0xFF006D4A),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                          Flexible(
+                            child: Text(
+                              formatVnd(goal.targetAmount),
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFF006D4A),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

@@ -7,7 +7,7 @@ import '../../../../core/constants/app_assets.dart';
 import '../../../../core/navigation/app_routes.dart';
 import '../../data/home_demo_data.dart';
 import '../widgets/home_components.dart';
-import 'offline_onboarding_screen.dart';
+import 'onboarding_shell.dart';
 
 class HomeSplashScreen extends StatefulWidget {
   const HomeSplashScreen({super.key});
@@ -16,23 +16,33 @@ class HomeSplashScreen extends StatefulWidget {
   State<HomeSplashScreen> createState() => _HomeSplashScreenState();
 }
 
-class _HomeSplashScreenState extends State<HomeSplashScreen> {
-  Timer? _timer;
+class _HomeSplashScreenState extends State<HomeSplashScreen> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(seconds: 2), () {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutExpo),
+    );
+
+    _controller.forward().then((_) {
       if (!mounted) return;
-      Navigator.of(
-        context,
-      ).pushReplacement(buildFadeSlideRoute(const OfflineOnboardingScreen()));
+      Navigator.of(context).pushReplacement(
+        buildFadeSlideRoute(const OnboardingShell()),
+      );
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -133,13 +143,18 @@ class _HomeSplashScreenState extends State<HomeSplashScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.centerLeft,
-                      child: Container(
-                        width: 66,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0053DB),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                      child: AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return Container(
+                            width: 237 * _animation.value,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0053DB),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),

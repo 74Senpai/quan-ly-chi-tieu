@@ -10,7 +10,7 @@ import '../../../budgets/data/budget_demo_data.dart' as budgets;
 import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../calendar/presentation/screens/calendar_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
-import '../../../savings/presentation/screens/savings_analysis_screen.dart';
+import '../../../savings/presentation/screens/savings_goals_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../debts/presentation/screens/debt_book_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
@@ -138,7 +138,7 @@ class DashboardScreen extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context).push(
                                   buildFadeSlideRoute(
-                                    const SavingsAnalysisScreen(),
+                                    const SavingsGoalsScreen(),
                                   ),
                                 );
                               },
@@ -201,34 +201,6 @@ class DashboardScreen extends StatelessWidget {
                 color: Colors.white,
                 size: 30,
               ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: HomeBottomNavigation(
-              activeTab: HomeTab.dashboard,
-              onCalendarTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const CalendarScreen()));
-              },
-              onWalletsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const WalletsScreen()));
-              },
-              onSettingsTap: () {
-                Navigator.of(
-                  context,
-                ).pushReplacement(buildFadeSlideRoute(const SettingsScreen()));
-              },
-              onAiTap: () {
-                Navigator.of(
-                  context,
-                ).push(buildFadeSlideRoute(const AssistantLandingScreen()));
-              },
             ),
           ),
         ],
@@ -615,7 +587,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 176,
+            height: 220,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: const [
@@ -699,7 +671,7 @@ class _WeekBar extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Container(
               height: height,
               decoration: BoxDecoration(
@@ -707,7 +679,7 @@ class _WeekBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               day,
               style: GoogleFonts.inter(

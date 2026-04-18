@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
+import '../../../home/presentation/widgets/home_components.dart';
 import '../../data/ai_demo_data.dart';
 
 class AssistantShell extends StatelessWidget {
@@ -13,12 +14,24 @@ class AssistantShell extends StatelessWidget {
     required this.body,
     required this.onMicTap,
     required this.onCameraTap,
+    this.onDashboardTap,
+    this.onCalendarTap,
+    this.onWalletsTap,
+    this.onSettingsTap,
+    this.onNotificationTap,
+    this.showBottomBar = true,
   });
 
   final String title;
   final List<Widget> body;
   final VoidCallback onMicTap;
   final VoidCallback onCameraTap;
+  final VoidCallback? onDashboardTap;
+  final VoidCallback? onCalendarTap;
+  final VoidCallback? onWalletsTap;
+  final VoidCallback? onSettingsTap;
+  final VoidCallback? onNotificationTap;
+  final bool showBottomBar;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +42,10 @@ class AssistantShell extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                AssistantHeader(title: title),
+                AssistantHeader(
+                  title: title,
+                  onNotificationTap: onNotificationTap,
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 220),
@@ -48,12 +64,20 @@ class AssistantShell extends StatelessWidget {
             bottom: 112,
             child: InputBar(onMicTap: onMicTap, onCameraTap: onCameraTap),
           ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomNavigationBarCard(),
-          ),
+          if (showBottomBar)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: HomeBottomNavigation(
+                activeTab: HomeTab.ai,
+                onDashboardTap: onDashboardTap,
+                onCalendarTap: onCalendarTap,
+                onAiTap: () {},
+                onWalletsTap: onWalletsTap,
+                onSettingsTap: onSettingsTap,
+              ),
+            ),
         ],
       ),
     );
@@ -61,9 +85,10 @@ class AssistantShell extends StatelessWidget {
 }
 
 class AssistantHeader extends StatelessWidget {
-  const AssistantHeader({super.key, required this.title});
+  const AssistantHeader({super.key, required this.title, this.onNotificationTap});
 
   final String title;
+  final VoidCallback? onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +122,7 @@ class AssistantHeader extends StatelessWidget {
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {},
+            onPressed: onNotificationTap,
             icon: const Icon(
               Icons.notifications_none_rounded,
               color: Color(0xFF0053DB),
@@ -210,80 +235,6 @@ class GradientActionButton extends StatelessWidget {
           height: 48,
           child: Icon(icon, color: Colors.white),
         ),
-      ),
-    );
-  }
-}
-
-class BottomNavigationBarCard extends StatelessWidget {
-  const BottomNavigationBarCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final items = <({IconData icon, String label, bool active})>[
-      (icon: Icons.dashboard_outlined, label: 'DASHBOARD', active: false),
-      (icon: Icons.calendar_month_outlined, label: 'CALENDAR', active: false),
-      (icon: Icons.auto_awesome, label: 'AI ASSISTANT', active: true),
-      (
-        icon: Icons.account_balance_wallet_outlined,
-        label: 'WALLETS',
-        active: false,
-      ),
-      (icon: Icons.settings_outlined, label: 'SETTINGS', active: false),
-    ];
-
-    return Container(
-      height: 92,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x40000000),
-            blurRadius: 4.5,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: items.map((item) {
-          final color = item.active
-              ? const Color(0xFF5686E1)
-              : const Color(0xFF94A3B8);
-          return InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Tab ${item.label} đang ở chế độ demo.'),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(item.icon, size: 30, color: color),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.label,
-                    style: GoogleFonts.inter(
-                      color: color,
-                      fontSize: 11,
-                      letterSpacing: 0.275,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

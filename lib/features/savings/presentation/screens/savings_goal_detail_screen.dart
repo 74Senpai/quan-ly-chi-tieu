@@ -305,12 +305,16 @@ class _SummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${formatVnd(goal.currentAmount)} / ${formatVnd(goal.targetAmount)}',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF0053DB),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${formatVnd(goal.currentAmount)} / ${formatVnd(goal.targetAmount)}',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF0053DB),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -366,12 +370,16 @@ class _MiniStat extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.manrope(
-              color: const Color(0xFF0053DB),
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF0053DB),
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -478,18 +486,22 @@ class _GrowthCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE6FFEE),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Đúng kế hoạch',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF006D4A),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6FFEE),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Đúng kế hoạch',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF006D4A),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
@@ -720,12 +732,16 @@ class _TxRow extends StatelessWidget {
             ],
           ),
         ),
-        Text(
-          '${isDeposit ? '+' : '-'}${formatVnd(tx.amount)}',
-          style: GoogleFonts.manrope(
-            color: color,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
+        Flexible(
+          child: Text(
+            '${isDeposit ? '+' : '-'}${formatVnd(tx.amount)}',
+            style: GoogleFonts.manrope(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

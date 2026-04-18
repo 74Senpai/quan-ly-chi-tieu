@@ -45,12 +45,14 @@ class BudgetOverviewScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             Row(
                               children: [
-                                Text(
-                                  'Hạn mức chi tiết',
-                                  style: GoogleFonts.manrope(
-                                    color: const Color(0xFF113069),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
+                                Expanded(
+                                  child: Text(
+                                    'Hạn mức chi tiết',
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF113069),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
@@ -508,13 +510,17 @@ class _BudgetHeroCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  formatCurrency(totalBudget),
-                  style: GoogleFonts.manrope(
-                    color: const Color(0xFFF8F7FF),
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.9,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    formatCurrency(totalBudget),
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFFF8F7FF),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.9,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -592,14 +598,20 @@ class _HeroLine extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.white),
         const SizedBox(width: 8),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            color: highlight
-                ? const Color(0xFF6FFBBE)
-                : const Color(0xFFF8F7FF),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                color: highlight
+                    ? const Color(0xFF6FFBBE)
+                    : const Color(0xFFF8F7FF),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
       ],
@@ -674,12 +686,16 @@ class _BudgetListCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        budget.template.name,
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFF113069),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          budget.template.name,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF113069),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -716,22 +732,30 @@ class _BudgetListCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Đã dùng ${budget.usagePercent}%',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF445D99),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    'Đã dùng ${budget.usagePercent}%',
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  'Hạn mức: ${formatCurrency(budget.limitAmount)}',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF445D99),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'Hạn mức: ${formatCurrency(budget.limitAmount)}',
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF445D99),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -906,17 +930,26 @@ class _CycleSelector extends StatelessWidget {
                   ? Border.all(color: const Color(0xFF0053DB))
                   : null,
             ),
-            alignment: Alignment.center,
-            child: Text(
-              cycle.label,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: active
-                    ? const Color(0xFF0053DB)
-                    : const Color(0xFF445D99),
-                fontSize: 14,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      cycle.label,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: active
+                            ? const Color(0xFF0053DB)
+                            : const Color(0xFF445D99),
+                        fontSize: 14,
+                        fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1031,18 +1064,27 @@ class _BudgetPreviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Đã chi: ${formatCurrency(spentAmount)}',
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+              Flexible(
+                child: Text(
+                  'Đã chi: ${formatCurrency(spentAmount)}',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                ),
               ),
-              const Spacer(),
-              Text(
-                formatCurrency(amount),
-                style: GoogleFonts.manrope(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    formatCurrency(amount),
+                    style: GoogleFonts.manrope(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ],

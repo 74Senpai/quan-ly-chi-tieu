@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 class HomeBackground extends StatelessWidget {
   const HomeBackground({super.key, this.showTexture = false});
@@ -138,11 +139,16 @@ class PrimaryBlueButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: GoogleFonts.manrope(
-                    color: const Color(0xFFF8F7FF),
-                    fontSize: 18,
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFFF8F7FF),
+                      fontSize: 18,
+                    ),
                   ),
                 ),
                 if (icon != null) ...[
@@ -183,6 +189,9 @@ class OutlineBlueButton extends StatelessWidget {
         ),
         child: Text(
           label,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
           style: GoogleFonts.manrope(
             color: const Color(0xFF0053DB),
             fontSize: 16,
@@ -199,55 +208,58 @@ class HomeBottomNavigation extends StatelessWidget {
   const HomeBottomNavigation({
     super.key,
     required this.activeTab,
+    this.onTabSelected,
     this.onDashboardTap,
     this.onCalendarTap,
-    required this.onAiTap,
+    this.onAiTap,
     this.onWalletsTap,
     this.onSettingsTap,
   });
 
   final HomeTab activeTab;
+  final ValueChanged<HomeTab>? onTabSelected;
   final VoidCallback? onDashboardTap;
   final VoidCallback? onCalendarTap;
-  final VoidCallback onAiTap;
+  final VoidCallback? onAiTap;
   final VoidCallback? onWalletsTap;
   final VoidCallback? onSettingsTap;
 
   @override
   Widget build(BuildContext context) {
-    final items =
-        <({IconData icon, String label, bool active, VoidCallback? onTap})>[
-          (
-            icon: Icons.dashboard_outlined,
-            label: 'DASHBOARD',
-            active: activeTab == HomeTab.dashboard,
-            onTap: onDashboardTap,
-          ),
-          (
-            icon: Icons.calendar_month_outlined,
-            label: 'CALENDAR',
-            active: activeTab == HomeTab.calendar,
-            onTap: onCalendarTap,
-          ),
-          (
-            icon: Icons.auto_awesome,
-            label: 'AI ASSISTANT',
-            active: activeTab == HomeTab.ai,
-            onTap: onAiTap,
-          ),
-          (
-            icon: Icons.account_balance_wallet_outlined,
-            label: 'WALLETS',
-            active: activeTab == HomeTab.wallets,
-            onTap: onWalletsTap,
-          ),
-          (
-            icon: Icons.settings_outlined,
-            label: 'SETTINGS',
-            active: activeTab == HomeTab.settings,
-            onTap: onSettingsTap,
-          ),
-        ];
+    final items = <
+      ({IconData icon, String label, HomeTab tab, VoidCallback? onTap})
+    >[
+      (
+        icon: Icons.dashboard_outlined,
+        label: 'DASHBOARD',
+        tab: HomeTab.dashboard,
+        onTap: onDashboardTap,
+      ),
+      (
+        icon: Icons.calendar_month_outlined,
+        label: 'CALENDAR',
+        tab: HomeTab.calendar,
+        onTap: onCalendarTap,
+      ),
+      (
+        icon: Icons.auto_awesome,
+        label: 'AI ASSISTANT',
+        tab: HomeTab.ai,
+        onTap: onAiTap,
+      ),
+      (
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'WALLETS',
+        tab: HomeTab.wallets,
+        onTap: onWalletsTap,
+      ),
+      (
+        icon: Icons.settings_outlined,
+        label: 'SETTINGS',
+        tab: HomeTab.settings,
+        onTap: onSettingsTap,
+      ),
+    ];
 
     return Container(
       height: 92,
@@ -268,41 +280,43 @@ class HomeBottomNavigation extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: items.map((item) {
-          final color = item.active
-              ? const Color(0xFF5686E1)
-              : const Color(0xFF94A3B8);
-          return InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap:
-                item.onTap ??
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Tab ${item.label} đang ở chế độ demo.'),
-                    ),
-                  );
+        children:
+            items.map((item) {
+              final active = item.tab == activeTab;
+              final color = active ? const Color(0xFF5686E1) : const Color(0xFF94A3B8);
+              return InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  if (onTabSelected != null) {
+                    onTabSelected!(item.tab);
+                  } else if (item.onTap != null) {
+                    item.onTap!();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Tab ${item.label} đang ở chế độ demo.')),
+                    );
+                  }
                 },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(item.icon, size: 30, color: color),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.label,
-                    style: GoogleFonts.inter(
-                      color: color,
-                      fontSize: 11,
-                      letterSpacing: 0.275,
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(item.icon, size: 30, color: color),
+                      const SizedBox(height: 6),
+                      Text(
+                        item.label,
+                        style: GoogleFonts.inter(
+                          color: color,
+                          fontSize: 11,
+                          letterSpacing: 0.275,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -371,9 +385,22 @@ class TopBrandBar extends StatelessWidget {
                 ],
               )
             else
-              const Icon(
-                Icons.notifications_none_rounded,
-                color: Color(0xFF0053DB),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: Color(0xFF0053DB),
+                  ),
+                ),
               ),
           ],
         ),

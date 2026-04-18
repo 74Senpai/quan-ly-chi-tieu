@@ -64,12 +64,14 @@ class AiSuggestionsScreen extends StatelessWidget {
                         const SizedBox(height: 26),
                         Row(
                           children: [
-                            Text(
-                              'Lời khuyên cho bạn',
-                              style: GoogleFonts.manrope(
-                                color: const Color(0xFF113069),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: Text(
+                                'Lời khuyên cho bạn',
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFF113069),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -196,13 +198,16 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          Text(
-            title,
-            style: GoogleFonts.manrope(
-              color: const Color(0xFF0F172A),
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
+          Expanded(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF0F172A),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
         ],
@@ -509,6 +514,8 @@ class _QuickActionCard extends StatelessWidget {
               child: Text(
                 buttonLabel,
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: GoogleFonts.inter(
                   color: const Color(0xFFF8F7FF),
                   fontSize: 14,

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/navigation/app_routes.dart';
 import '../../data/ai_demo_data.dart';
 import '../widgets/assistant_components.dart';
+import '../../../home/presentation/screens/main_navigation_shell.dart';
+import '../../../home/presentation/widgets/home_components.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'camera_capture_demo_screen.dart';
 import 'voice_listening_screen.dart';
 
@@ -48,6 +51,35 @@ class OcrConfirmationScreen extends StatelessWidget {
         Navigator.of(
           context,
         ).push(buildFadeSlideRoute(const CameraCaptureDemoScreen()));
+      },
+      onDashboardTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.dashboard)),
+          (route) => false,
+        );
+      },
+      onCalendarTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.calendar)),
+          (route) => false,
+        );
+      },
+      onWalletsTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.wallets)),
+          (route) => false,
+        );
+      },
+      onSettingsTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          buildFadeSlideRoute(const MainNavigationShell(initialTab: HomeTab.settings)),
+          (route) => false,
+        );
+      },
+      onNotificationTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+        );
       },
     );
   }
