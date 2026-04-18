@@ -8,6 +8,7 @@ import '../../../ai/presentation/screens/ai_suggestions_screen.dart';
 import '../../../budgets/data/budget_demo_data.dart' as budgets;
 import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
+import '../../../cashflow/presentation/screens/cashflow_overview_screen.dart';
 import '../../../investment/presentation/screens/investment_overview_screen.dart';
 import '../../../savings/presentation/screens/savings_goals_screen.dart';
 import '../../../tax/presentation/screens/tax_overview_screen.dart';
@@ -181,8 +182,13 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icons.waterfall_chart_rounded,
                               iconBackground: const Color(0xFFE9E1FF),
                               iconForeground: const Color(0xFF5B43A8),
-                              onTap: () =>
-                                  _showComingSoon(context, 'Dòng tiền'),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const CashFlowOverviewScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _FeatureMenuItem(
                               title: 'Đối soát',
