@@ -20,6 +20,7 @@ import '../../../transactions/presentation/screens/add_expense_screen.dart';
 import '../../../transactions/presentation/screens/income_expense_report_screen.dart';
 import '../../../transactions/presentation/screens/spending_structure_screen.dart';
 import '../../../wallets/presentation/screens/net_worth_screen.dart';
+import '../../../ledger/presentation/screens/main_dashboard.dart' as ledger;
 import '../widgets/home_components.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -266,6 +267,20 @@ class DashboardScreen extends StatelessWidget {
                                 Navigator.of(context).push(
                                   buildFadeSlideRoute(
                                     const SmartInsightsScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Ledger (Figma 2)',
+                              subtitle: 'Quản lý thu chi, thẻ và giới hạn.',
+                              icon: Icons.view_carousel_outlined,
+                              iconBackground: const Color(0xFFE0F2FE),
+                              iconForeground: const Color(0xFF0369A1),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const ledger.MainDashboard(),
                                   ),
                                 );
                               },
