@@ -10,6 +10,7 @@ import '../../../calendar/presentation/screens/calendar_screen.dart';
 import '../../../home/presentation/screens/dashboard_screen.dart';
 import '../../../home/presentation/widgets/home_components.dart';
 import '../../../wallets/presentation/screens/wallets_screen.dart';
+import 'security_overview_screen.dart';
 import '../../data/settings_demo_data.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -167,6 +168,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   : 'Thiết lập mã PIN và khóa ứng dụng',
                               color: const Color(0xFFDBE1FF),
                               onTap: _openSecuritySettings,
+                            ),
+                            _SettingsRow(
+                              icon: Icons.security_rounded,
+                              title: 'Security Center',
+                              subtitle: 'Privacy score, thiết bị, hoạt động đăng nhập',
+                              color: const Color(0xFFDBE1FF),
+                              onTap: () => Navigator.of(context).push(
+                                buildFadeSlideRoute(const SecurityOverviewScreen()),
+                              ),
                             ),
                             _SettingsRow(
                               icon: Icons.cloud_sync_outlined,

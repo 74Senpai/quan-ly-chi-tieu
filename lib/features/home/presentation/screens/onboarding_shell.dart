@@ -128,11 +128,13 @@ class _OnboardingShellState extends State<OnboardingShell> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 64),
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom + 20,
+                  ),
                   child: Column(
                     children: [
                       OnboardingProgress(index: _currentPage),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: PrimaryBlueButton(
@@ -170,13 +172,14 @@ class _OfflineOnboardingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _EntranceAnimation(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(),
+            const SizedBox(height: 16),
             _OfflineIllustration(),
-            const SizedBox(height: 54),
+            const SizedBox(height: 32),
             Text(
               HomeDemoData.offlinePage.title,
               textAlign: TextAlign.center,
@@ -199,7 +202,7 @@ class _OfflineOnboardingView extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -303,7 +306,7 @@ class _CalendarOnboardingView extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             _CalendarIllustration(),
-            const SizedBox(height: 54),
+            const SizedBox(height: 32),
             Text(
               HomeDemoData.calendarPage.title,
               textAlign: TextAlign.center,
@@ -543,13 +546,14 @@ class _AiOnboardingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _EntranceAnimation(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(),
+            const SizedBox(height: 16),
             _AiIllustration(),
-            const SizedBox(height: 54),
+            const SizedBox(height: 32),
             Text(
               HomeDemoData.aiPage.title,
               textAlign: TextAlign.center,
@@ -572,7 +576,7 @@ class _AiOnboardingView extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 16),
           ],
         ),
       ),
