@@ -279,40 +279,43 @@ class HomeBottomNavigation extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children:
             items.map((item) {
               final active = item.tab == activeTab;
               final color = active ? const Color(0xFF5686E1) : const Color(0xFF94A3B8);
-              return InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  if (onTabSelected != null) {
-                    onTabSelected!(item.tab);
-                  } else if (item.onTap != null) {
-                    item.onTap!();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Tab ${item.label} đang ở chế độ demo.')),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(item.icon, size: 30, color: color),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.label,
-                        style: GoogleFonts.inter(
-                          color: color,
-                          fontSize: 11,
-                          letterSpacing: 0.275,
+              return Expanded(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    if (onTabSelected != null) {
+                      onTabSelected!(item.tab);
+                    } else if (item.onTap != null) {
+                      item.onTap!();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Tab ${item.label} đang ở chế độ demo.')),
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(item.icon, size: 26, color: color),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.label,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            color: color,
+                            fontSize: 9,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );

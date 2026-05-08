@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/navigation/app_routes.dart';
 import '../../../ai/presentation/screens/ai_suggestions_screen.dart';
+import '../../../ai/presentation/screens/smart_insights_screen.dart';
 import '../../../budgets/data/budget_demo_data.dart' as budgets;
 import '../../../budgets/presentation/screens/budget_overview_screen.dart';
 import '../../../forecast/presentation/screens/financial_forecast_screen.dart';
 import '../../../cashflow/presentation/screens/cashflow_overview_screen.dart';
 import '../../../investment/presentation/screens/investment_overview_screen.dart';
+import '../../../investment/presentation/screens/investment_performance_screen.dart';
 import '../../../reconciliation/presentation/screens/reconciliation_overview_screen.dart';
 import '../../../savings/presentation/screens/savings_goals_screen.dart';
 import '../../../tax/presentation/screens/tax_overview_screen.dart';
@@ -17,6 +19,7 @@ import '../../../debts/presentation/screens/debt_book_screen.dart';
 import '../../../transactions/presentation/screens/add_expense_screen.dart';
 import '../../../transactions/presentation/screens/income_expense_report_screen.dart';
 import '../../../transactions/presentation/screens/spending_structure_screen.dart';
+import '../../../wallets/presentation/screens/net_worth_screen.dart';
 import '../widgets/home_components.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -225,6 +228,48 @@ class DashboardScreen extends StatelessWidget {
                                 );
                               },
                             ),
+                            _FeatureMenuItem(
+                              title: 'Hiệu suất',
+                              subtitle: 'Phân tích hiệu suất danh mục Figma.',
+                              icon: Icons.bar_chart_rounded,
+                              iconBackground: const Color(0xFFE1EAFF),
+                              iconForeground: const Color(0xFF1E4E9D),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const InvestmentPerformanceScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Tài sản ròng',
+                              subtitle: 'Tổng tài sản trừ nợ phải trả.',
+                              icon: Icons.account_balance_rounded,
+                              iconBackground: const Color(0xFFDBE1FF),
+                              iconForeground: const Color(0xFF0053DB),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const NetWorthScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _FeatureMenuItem(
+                              title: 'Smart Insights',
+                              subtitle: 'Quan sát tài chính từ AI.',
+                              icon: Icons.lightbulb_outline_rounded,
+                              iconBackground: const Color(0xFFF3E8FF),
+                              iconForeground: const Color(0xFF6D28D9),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  buildFadeSlideRoute(
+                                    const SmartInsightsScreen(),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -396,29 +441,35 @@ class _BalanceHero extends StatelessWidget {
         children: [
           Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tổng số dư',
-                    style: GoogleFonts.inter(
-                      color: const Color(0xCCFFFFFF),
-                      fontSize: 13,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tổng số dư',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xCCFFFFFF),
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '42.500.000₫',
-                    style: GoogleFonts.manrope(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.2,
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '42.500.000₫',
+                        style: GoogleFonts.manrope(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1.2,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -545,22 +596,29 @@ class _PocketStat extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: Colors.white),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: Colors.white.withValues(alpha: 0.88),
-                  fontSize: 12,
+              Flexible(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withValues(alpha: 0.88),
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            value,
-            style: GoogleFonts.manrope(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.manrope(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
